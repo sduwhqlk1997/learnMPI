@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/qiu/learnMPI/testGDB/build",
+  "command": "/usr/bin/g++   -g -o CMakeFiles/main.dir/main.cpp.o -c /home/qiu/learnMPI/testGDB/main.cpp",
+  "file": "/home/qiu/learnMPI/testGDB/main.cpp",
+  "output": "CMakeFiles/main.dir/main.cpp.o"
+}
+]

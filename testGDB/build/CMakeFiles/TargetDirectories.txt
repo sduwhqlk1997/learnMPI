@@ -1,0 +1,3 @@
+/home/qiu/learnMPI/testGDB/build/CMakeFiles/main.dir
+/home/qiu/learnMPI/testGDB/build/CMakeFiles/edit_cache.dir
+/home/qiu/learnMPI/testGDB/build/CMakeFiles/rebuild_cache.dir
