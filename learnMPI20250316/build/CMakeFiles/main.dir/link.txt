@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,-rpath -Wl,/home/qiu/qlk/Cppackage/mpi/lib -Wl,--enable-new-dtags CMakeFiles/main.dir/main.cpp.o -o main  -Wl,-rpath,/home/qiu/qlk/Cppackage/mpi/lib /home/qiu/qlk/Cppackage/mpi/lib/libmpicxx.so /home/qiu/qlk/Cppackage/mpi/lib/libmpi.so 
