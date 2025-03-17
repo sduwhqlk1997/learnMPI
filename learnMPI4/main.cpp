@@ -10,7 +10,7 @@ double update(int myoffset, int chunk, int myid){
     double mysum;
     mysum = 0;
     for(int i=myoffset; i<myoffset+chunk; i++){
-        data[i] = data[i] + (i*1.0);
+        //data[i] = data[i] + (i*1.0);
         mysum = mysum + data[i];
     }
     printf("Task %d mysum = %e\n",myid,mysum);
