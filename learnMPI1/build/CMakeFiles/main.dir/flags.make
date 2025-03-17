@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -isystem /root/Cppackage/mpi/include
+CXX_INCLUDES = -isystem /home/qiu/qlk/Cppackage/mpi/include
 
 CXX_FLAGS = 
 

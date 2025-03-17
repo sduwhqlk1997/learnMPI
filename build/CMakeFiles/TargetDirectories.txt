@@ -1,3 +1,0 @@
-/home/qiu/learnMPI/build/CMakeFiles/main.dir
-/home/qiu/learnMPI/build/CMakeFiles/edit_cache.dir
-/home/qiu/learnMPI/build/CMakeFiles/rebuild_cache.dir
