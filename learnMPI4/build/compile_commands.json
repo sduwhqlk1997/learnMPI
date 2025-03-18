@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/qiu/learnMPI/learnMPI4/build",
-  "command": "/usr/bin/g++  -isystem /home/qiu/qlk/Cppackage/mpi/include -g -o CMakeFiles/main.dir/main.cpp.o -c /home/qiu/learnMPI/learnMPI4/main.cpp",
-  "file": "/home/qiu/learnMPI/learnMPI4/main.cpp",
-  "output": "CMakeFiles/main.dir/main.cpp.o"
-}
-]

@@ -65,18 +65,12 @@
 	"compileGroups" : 
 	[
 		{
-			"compileCommandFragments" : 
-			[
-				{
-					"fragment" : "-g"
-				}
-			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 2,
 					"isSystem" : true,
-					"path" : "/home/qiu/qlk/Cppackage/mpi/include"
+					"path" : "/root/Cppackage/mpi/include"
 				}
 			],
 			"language" : "CXX",
@@ -92,10 +86,6 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-g",
-				"role" : "flags"
-			},
-			{
 				"fragment" : "",
 				"role" : "flags"
 			},
@@ -106,7 +96,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "-Wl,/home/qiu/qlk/Cppackage/mpi/lib",
+				"fragment" : "-Wl,/root/Cppackage/mpi/lib",
 				"role" : "flags"
 			},
 			{
@@ -115,17 +105,17 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/qiu/qlk/Cppackage/mpi/lib",
+				"fragment" : "-Wl,-rpath,/root/Cppackage/mpi/lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 6,
-				"fragment" : "/home/qiu/qlk/Cppackage/mpi/lib/libmpicxx.so",
+				"fragment" : "/root/Cppackage/mpi/lib/libmpicxx.so",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 6,
-				"fragment" : "/home/qiu/qlk/Cppackage/mpi/lib/libmpi.so",
+				"fragment" : "/root/Cppackage/mpi/lib/libmpi.so",
 				"role" : "libraries"
 			}
 		],

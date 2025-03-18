@@ -10,7 +10,7 @@
 				{
 					"includeDirectories" : 
 					[
-						"/home/qiu/qlk/Cppackage/mpi/include",
+						"/root/Cppackage/mpi/include",
 						"/usr/lib/gcc/x86_64-linux-gnu/13/include",
 						"/usr/local/include",
 						"/usr/include/x86_64-linux-gnu",
@@ -34,7 +34,7 @@
 						"gcc_s"
 					]
 				},
-				"path" : "/usr/bin/gcc",
+				"path" : "/usr/bin/cc",
 				"version" : "13.3.0"
 			},
 			"language" : "C",
@@ -80,7 +80,7 @@
 						"gcc"
 					]
 				},
-				"path" : "/usr/bin/g++",
+				"path" : "/usr/bin/c++",
 				"version" : "13.3.0"
 			},
 			"language" : "CXX",

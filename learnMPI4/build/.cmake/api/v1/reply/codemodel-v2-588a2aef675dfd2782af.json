@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -19,7 +19,7 @@
 					]
 				}
 			],
-			"name" : "Debug",
+			"name" : "",
 			"projects" : 
 			[
 				{
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "main::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-main-Debug-7e6c8fc9c84c6e930737.json",
+					"jsonFile" : "target-main-61e6a1d9546c4ea96d07.json",
 					"name" : "main",
 					"projectIndex" : 0
 				}
@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/qiu/learnMPI/learnMPI4/build",
-		"source" : "/home/qiu/learnMPI/learnMPI4"
+		"build" : "/root/CppCode/LearnMPI/learnMPI4/build",
+		"source" : "/root/CppCode/LearnMPI/learnMPI4"
 	},
 	"version" : 
 	{

@@ -39,11 +39,11 @@
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..."
 				}
 			],
 			"type" : "STRING",
-			"value" : "Debug"
+			"value" : ""
 		},
 		{
 			"name" : "CMAKE_CACHEFILE_DIR",
@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/qiu/learnMPI/learnMPI4/build"
+			"value" : "/root/CppCode/LearnMPI/learnMPI4/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -155,11 +155,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "CXX compiler"
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/g++"
+			"value" : "/usr/bin/c++"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_AR",
@@ -283,11 +283,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "C compiler"
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/gcc"
+			"value" : "/usr/bin/cc"
 		},
 		{
 			"name" : "CMAKE_C_COMPILER_AR",
@@ -519,11 +519,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "Enable/Disable output of compile commands during generation."
 				}
 			],
 			"type" : "BOOL",
-			"value" : "TRUE"
+			"value" : ""
 		},
 		{
 			"name" : "CMAKE_EXTRA_GENERATOR",
@@ -547,7 +547,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/qiu/learnMPI/learnMPI4/build/CMakeFiles/pkgRedirects"
+			"value" : "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -607,7 +607,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/qiu/learnMPI/learnMPI4"
+			"value" : "/root/CppCode/LearnMPI/learnMPI4"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -1171,7 +1171,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "[/home/qiu/qlk/Cppackage/mpi/lib/libmpi.so][mpi][/home/qiu/qlk/Cppackage/mpi/include][TRUE][v4.1()]"
+			"value" : "[/root/Cppackage/mpi/lib/libmpi.so][mpi][/root/Cppackage/mpi/include][TRUE][v4.1()]"
 		},
 		{
 			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_MPI_CXX",
@@ -1183,7 +1183,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "[/home/qiu/qlk/Cppackage/mpi/lib/libmpicxx.so][/home/qiu/qlk/Cppackage/mpi/lib/libmpi.so][mpicxx;mpi][/home/qiu/qlk/Cppackage/mpi/include][TRUE][v4.1()]"
+			"value" : "[/root/Cppackage/mpi/lib/libmpicxx.so][/root/Cppackage/mpi/lib/libmpi.so][mpicxx;mpi][/root/Cppackage/mpi/include][TRUE][v4.1()]"
 		},
 		{
 			"name" : "MPIEXEC_EXECUTABLE",
@@ -1199,7 +1199,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/bin/mpiexec"
+			"value" : "/root/Cppackage/mpi/bin/mpiexec"
 		},
 		{
 			"name" : "MPIEXEC_MAX_NUMPROCS",
@@ -1215,7 +1215,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "16"
+			"value" : "8"
 		},
 		{
 			"name" : "MPIEXEC_NUMPROC_FLAG",
@@ -1295,7 +1295,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/bin/mpicxx"
+			"value" : "/root/Cppackage/mpi/bin/mpicxx"
 		},
 		{
 			"name" : "MPI_CXX_COMPILER_INCLUDE_DIRS",
@@ -1311,7 +1311,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/include"
+			"value" : "/root/Cppackage/mpi/include"
 		},
 		{
 			"name" : "MPI_CXX_COMPILE_DEFINITIONS",
@@ -1359,7 +1359,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/include"
+			"value" : "/root/Cppackage/mpi/include"
 		},
 		{
 			"name" : "MPI_CXX_LIB_NAMES",
@@ -1391,7 +1391,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "-Wl,-rpath -Wl,/home/qiu/qlk/Cppackage/mpi/lib -Wl,--enable-new-dtags"
+			"value" : "-Wl,-rpath -Wl,/root/Cppackage/mpi/lib -Wl,--enable-new-dtags"
 		},
 		{
 			"name" : "MPI_CXX_SKIP_MPICXX",
@@ -1439,7 +1439,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/bin/mpicc"
+			"value" : "/root/Cppackage/mpi/bin/mpicc"
 		},
 		{
 			"name" : "MPI_C_COMPILER_INCLUDE_DIRS",
@@ -1455,7 +1455,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/include"
+			"value" : "/root/Cppackage/mpi/include"
 		},
 		{
 			"name" : "MPI_C_COMPILE_DEFINITIONS",
@@ -1503,7 +1503,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/include"
+			"value" : "/root/Cppackage/mpi/include"
 		},
 		{
 			"name" : "MPI_C_LIB_NAMES",
@@ -1535,7 +1535,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "-Wl,-rpath -Wl,/home/qiu/qlk/Cppackage/mpi/lib -Wl,--enable-new-dtags"
+			"value" : "-Wl,-rpath -Wl,/root/Cppackage/mpi/lib -Wl,--enable-new-dtags"
 		},
 		{
 			"name" : "MPI_RESULT_CXX_test_mpi_MPICXX",
@@ -1587,7 +1587,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/lib/libmpi.so"
+			"value" : "/root/Cppackage/mpi/lib/libmpi.so"
 		},
 		{
 			"name" : "MPI_mpicxx_LIBRARY",
@@ -1603,7 +1603,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/home/qiu/qlk/Cppackage/mpi/lib/libmpicxx.so"
+			"value" : "/root/Cppackage/mpi/lib/libmpicxx.so"
 		},
 		{
 			"name" : "PKG_CONFIG_ARGN",
@@ -1659,7 +1659,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/qiu/learnMPI/learnMPI4/build"
+			"value" : "/root/CppCode/LearnMPI/learnMPI4/build"
 		},
 		{
 			"name" : "learnMPI1_IS_TOP_LEVEL",
@@ -1683,7 +1683,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/qiu/learnMPI/learnMPI4"
+			"value" : "/root/CppCode/LearnMPI/learnMPI4"
 		}
 	],
 	"kind" : "cache",
