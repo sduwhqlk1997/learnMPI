@@ -634,3 +634,102 @@ events:
         
       exitCode: 0
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1278 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1322 (_MPI_try_staged_settings)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1645 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:3 (find_package)"
+    description: "The MPI test test_mpi for C in mode normal"
+    directories:
+      source: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp"
+      binary: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_C_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_97295/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_97295.dir/build.make CMakeFiles/cmTC_97295.dir/build
+        gmake[1]: Entering directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp'
+        Building C object CMakeFiles/cmTC_97295.dir/test_mpi.c.o
+        /usr/bin/cc    -o CMakeFiles/cmTC_97295.dir/test_mpi.c.o -c /root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp/test_mpi.c
+        Linking C executable cmTC_97295
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_97295.dir/link.txt --verbose=1
+        /usr/bin/cc -Wl,-rpath -Wl,/root/Cppackage/mpi/lib -Wl,--enable-new-dtags CMakeFiles/cmTC_97295.dir/test_mpi.c.o -o cmTC_97295  -Wl,-rpath,/root/Cppackage/mpi/lib /root/Cppackage/mpi/lib/libmpi.so 
+        gmake[1]: Leaving directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-7Fpnmp'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1278 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1322 (_MPI_try_staged_settings)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1645 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:3 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd"
+      binary: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_379d6/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_379d6.dir/build.make CMakeFiles/cmTC_379d6.dir/build
+        gmake[1]: Entering directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd'
+        Building CXX object CMakeFiles/cmTC_379d6.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /root/Cppackage/mpi/include  -o CMakeFiles/cmTC_379d6.dir/test_mpi.cpp.o -c /root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd/test_mpi.cpp
+        Linking CXX executable cmTC_379d6
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_379d6.dir/link.txt --verbose=1
+        /usr/bin/c++ -Wl,-rpath -Wl,/root/Cppackage/mpi/lib -Wl,--enable-new-dtags CMakeFiles/cmTC_379d6.dir/test_mpi.cpp.o -o cmTC_379d6  -Wl,-rpath,/root/Cppackage/mpi/lib /root/Cppackage/mpi/lib/libmpicxx.so /root/Cppackage/mpi/lib/libmpi.so 
+        gmake[1]: Leaving directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-oqyWnd'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1278 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1672 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:3 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr"
+      binary: "/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4d547/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_4d547.dir/build.make CMakeFiles/cmTC_4d547.dir/build
+        gmake[1]: Entering directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr'
+        Building CXX object CMakeFiles/cmTC_4d547.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /root/Cppackage/mpi/include  -o CMakeFiles/cmTC_4d547.dir/test_mpi.cpp.o -c /root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr/test_mpi.cpp
+        Linking CXX executable cmTC_4d547
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4d547.dir/link.txt --verbose=1
+        /usr/bin/c++ -Wl,-rpath -Wl,/root/Cppackage/mpi/lib -Wl,--enable-new-dtags CMakeFiles/cmTC_4d547.dir/test_mpi.cpp.o -o cmTC_4d547  -Wl,-rpath,/root/Cppackage/mpi/lib /root/Cppackage/mpi/lib/libmpicxx.so /root/Cppackage/mpi/lib/libmpi.so 
+        gmake[1]: Leaving directory '/root/CppCode/LearnMPI/learnMPI4/build/CMakeFiles/CMakeScratch/TryCompile-PdbIrr'
+        
+      exitCode: 0
+...
