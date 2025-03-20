@@ -50,19 +50,20 @@ int main(int argc, char *argv[])
         { // 向各子进程传递信息
             rows = dest <= remainderNR ? SendNR + 1 : SendNR;
             cout << "Sending " << rows << " rows to task " << dest << " offset= " << offset << endl;
-            MPI_Send(&offset, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
-            MPI_Send(&rows, 1, MPI_INT, dest, tag, MPI_COMM_WORLD);
-            MPI_Send(&A[offset][0], rows * NCA, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
-            MPI_Send(&B, NRB * NCB, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+            MPI_Send(&A[offset][0], rows * NCA, MPI_DOUBLE, dest, 3, MPI_COMM_WORLD);
+            MPI_Send(&offset, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
+            MPI_Send(&rows, 1, MPI_INT, dest, 2, MPI_COMM_WORLD);
+            
+            MPI_Send(&B, NRB * NCB, MPI_DOUBLE, dest, 4, MPI_COMM_WORLD);
             offset += rows;
         }
 
         tag = FROM_WORKER;
         for (int dest = 1; dest <= numtasks; dest++)
         { // 接收子进程的计算结果
-            MPI_Recv(&offset, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &status);
-            MPI_Recv(&rows, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &status);
-            MPI_Recv(&C[offset][0], rows * NCB, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD, &status);
+            MPI_Recv(&offset, 1, MPI_INT, dest, 1, MPI_COMM_WORLD, &status);
+            MPI_Recv(&rows, 1, MPI_INT, dest, 2, MPI_COMM_WORLD, &status);
+            MPI_Recv(&C[offset][0], rows * NCB, MPI_DOUBLE, dest, 5, MPI_COMM_WORLD, &status);
             cout << "Received results from task " << dest << endl;
             cout << "worker " << dest << " results is:" << endl;
             for (int i = 0; i < rows; i++)
@@ -91,10 +92,10 @@ int main(int argc, char *argv[])
     {
         /* 接收主进程的信息 */
         tag = FROM_MASTER;
-        MPI_Recv(&offset, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&rows, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&A, rows * NCA, MPI_DOUBLE, MASTER, tag, MPI_COMM_WORLD, &status);
-        MPI_Recv(&B, NRB * NCB, MPI_DOUBLE, MASTER, tag, MPI_COMM_WORLD, &status);
+        MPI_Recv(&offset, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD, &status);
+        MPI_Recv(&rows, 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD, &status);
+        MPI_Recv(&A, rows * NCA, MPI_DOUBLE, MASTER, 3, MPI_COMM_WORLD, &status);
+        MPI_Recv(&B, NRB * NCB, MPI_DOUBLE, MASTER, 4, MPI_COMM_WORLD, &status);
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < NCB; j++)
@@ -107,9 +108,9 @@ int main(int argc, char *argv[])
             }
         }
         tag = FROM_WORKER;
-        MPI_Send(&offset, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
-        MPI_Send(&rows, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
-        MPI_Send(&C, rows * NCB, MPI_DOUBLE, MASTER, tag, MPI_COMM_WORLD);
+        MPI_Send(&offset, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD);
+        MPI_Send(&rows, 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD);
+        MPI_Send(&C, rows * NCB, MPI_DOUBLE, MASTER, 5, MPI_COMM_WORLD);
     }
     MPI_Finalize();
 }
