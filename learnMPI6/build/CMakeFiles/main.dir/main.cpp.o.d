@@ -1,4 +1,4 @@
-CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI6/main.cpp \
+CMakeFiles/main.dir/main.cpp.o: /home/qiu/learnMPI/learnMPI6/main.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -148,11 +148,12 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI6/main.cpp \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc /root/Cppackage/mpi/include/mpi.h \
- /usr/include/c++/13/cstdint \
+ /usr/include/c++/13/bits/istream.tcc \
+ /home/qiu/qlk/Cppackage/mpi/include/mpi.h /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /root/Cppackage/mpi/include/mpi_proto.h \
- /root/Cppackage/mpi/include/mpio.h /root/Cppackage/mpi/include/mpi.h \
- /root/Cppackage/mpi/include/mpicxx.h
+ /home/qiu/qlk/Cppackage/mpi/include/mpi_proto.h \
+ /home/qiu/qlk/Cppackage/mpi/include/mpio.h \
+ /home/qiu/qlk/Cppackage/mpi/include/mpi.h \
+ /home/qiu/qlk/Cppackage/mpi/include/mpicxx.h
