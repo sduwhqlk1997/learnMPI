@@ -19,11 +19,11 @@ double update(int myoffset, int chunk, int myid){
 }
 
 int main (int argc, char *argv[]){
-    #ifdef DEBUG
+   # ifdef DEBUG
     {
         int i=0;
         while (0==i){
-            sleep(i);
+            sleep(1);
         }
     }
     #endif
