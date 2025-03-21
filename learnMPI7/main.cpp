@@ -7,7 +7,7 @@ using namespace std;
     {
         int i=0;
         while (0==i){
-            sleep(1);
+            sleep(10);
         }
     }
     #endif
