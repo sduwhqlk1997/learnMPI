@@ -103,6 +103,7 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
+  /usr/include/linux/close_range.h \
   /usr/include/linux/errno.h \
   /usr/include/locale.h \
   /usr/include/pthread.h \
@@ -112,20 +113,26 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
   /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/time.h \
+  /usr/include/unistd.h \
   /usr/include/wchar.h \
   /usr/include/wctype.h \
   /usr/include/x86_64-linux-gnu/asm/errno.h \
   /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
   /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+  /usr/include/x86_64-linux-gnu/bits/confname.h \
   /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
   /usr/include/x86_64-linux-gnu/bits/endian.h \
   /usr/include/x86_64-linux-gnu/bits/endianness.h \
+  /usr/include/x86_64-linux-gnu/bits/environments.h \
   /usr/include/x86_64-linux-gnu/bits/errno.h \
   /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
   /usr/include/x86_64-linux-gnu/bits/floatn.h \
+  /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+  /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
   /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
   /usr/include/x86_64-linux-gnu/bits/locale.h \
   /usr/include/x86_64-linux-gnu/bits/long-double.h \
+  /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
   /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
@@ -171,6 +178,7 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
   /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
   /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
+  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
   /usr/include/x86_64-linux-gnu/bits/waitflags.h \
   /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
   /usr/include/x86_64-linux-gnu/bits/wchar.h \
@@ -222,6 +230,8 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
+/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
+
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
@@ -270,10 +280,6 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
-/usr/include/x86_64-linux-gnu/sys/select.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/setjmp.h:
@@ -283,6 +289,10 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/sched.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/c++/13/bits/stl_construct.h:
 
@@ -300,8 +310,6 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/cpu-set.h:
 
-/usr/include/c++/13/bits/invoke.h:
-
 /usr/include/c++/13/bits/locale_classes.tcc:
 
 /usr/include/c++/13/bits/allocator.h:
@@ -315,6 +323,8 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/c++/13/bits/char_traits.h:
 
 /usr/include/c++/13/bits/ostream.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:
 
@@ -331,6 +341,8 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/c++/13/backward/binders.h:
 
 /usr/include/c++/13/bits/stringfwd.h:
+
+/usr/include/linux/close_range.h:
 
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
@@ -422,9 +434,9 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/c++/13/bits/cxxabi_forced.h:
 
-/usr/include/c++/13/bits/functexcept.h:
-
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
+
+/usr/include/c++/13/bits/functexcept.h:
 
 /usr/include/c++/13/bits/stl_iterator.h:
 
@@ -449,6 +461,12 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/c++/13/bits/new_allocator.h:
+
+/usr/include/c++/13/bits/uses_allocator_args.h:
 
 /usr/include/c++/13/bits/stl_function.h:
 
@@ -514,10 +532,6 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/c++/13/new:
 
-/usr/include/c++/13/bits/streambuf_iterator.h:
-
-/usr/include/c++/13/ostream:
-
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
 /usr/include/c++/13/pstl/pstl_config.h:
@@ -527,6 +541,8 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/c++/13/bits/range_access.h:
 
 /usr/include/c++/13/system_error:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
 
 /usr/include/c++/13/bits/cxxabi_init_exception.h:
 
@@ -554,6 +570,12 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/stdlib.h:
 
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
+/usr/include/unistd.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
 /usr/include/x86_64-linux-gnu/asm/errno.h:
@@ -562,11 +584,11 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
-/usr/include/c++/13/bits/new_allocator.h:
+/usr/include/c++/13/bits/streambuf_iterator.h:
 
-/usr/include/c++/13/bits/uses_allocator_args.h:
+/usr/include/c++/13/ostream:
 
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/x86_64-linux-gnu/bits/confname.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs.h:
 
@@ -575,6 +597,10 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/c++/13/bits/basic_string.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/usr/include/c++/13/bits/invoke.h:
+
+/usr/include/x86_64-linux-gnu/bits/environments.h:
 
 /usr/include/c++/13/exception:
 
@@ -585,5 +611,3 @@ CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI4/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
-
-/usr/include/x86_64-linux-gnu/bits/locale.h:

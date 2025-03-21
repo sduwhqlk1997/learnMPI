@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include <mpi.h>
 
 #define ARRAYSIZE 20000000
@@ -18,6 +19,15 @@ double update(int myoffset, int chunk, int myid){
 }
 
 int main (int argc, char *argv[]){
+    #ifdef DEBUG
+    {
+        int i=0;
+        while (0==i){
+            sleep(i);
+        }
+    }
+    #endif
+
     int numtasks, taskid, rc, dest, offset, tag1, tag2, source, 
         chunksize, leftover;
     double mysum, sum;
