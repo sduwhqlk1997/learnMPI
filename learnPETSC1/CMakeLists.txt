@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(PETScTest)
 
 # 设置 PETSc 的安装路径
-set(PETSc_DIR "/root/Cppackage/petsc")  # 替换为你的 PETSc 安装路径
+set(PETSc_DIR "/home/qiu/qlk/Cppackage/petsc")  # 替换为你的 PETSc 安装路径
 
 # 包含 PETSc 头文件路径
 include_directories(${PETSc_DIR}/include)
