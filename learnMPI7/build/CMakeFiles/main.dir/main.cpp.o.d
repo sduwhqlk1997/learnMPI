@@ -1,4 +1,4 @@
-CMakeFiles/main.dir/main.cpp.o: /home/qiu/learnMPI/learnMPI7/main.cpp \
+CMakeFiles/main.dir/main.cpp.o: /root/CppCode/LearnMPI/learnMPI7/main.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -155,12 +155,11 @@ CMakeFiles/main.dir/main.cpp.o: /home/qiu/learnMPI/learnMPI7/main.cpp \
  /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
  /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
- /usr/include/linux/close_range.h \
- /home/qiu/qlk/Cppackage/mpi/include/mpi.h /usr/include/c++/13/cstdint \
+ /usr/include/linux/close_range.h /root/Cppackage/mpi/include/mpi.h \
+ /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
- /home/qiu/qlk/Cppackage/mpi/include/mpi_proto.h \
- /home/qiu/qlk/Cppackage/mpi/include/mpio.h \
- /home/qiu/qlk/Cppackage/mpi/include/mpi.h \
- /home/qiu/qlk/Cppackage/mpi/include/mpicxx.h
+ /root/Cppackage/mpi/include/mpi_proto.h \
+ /root/Cppackage/mpi/include/mpio.h /root/Cppackage/mpi/include/mpi.h \
+ /root/Cppackage/mpi/include/mpicxx.h
