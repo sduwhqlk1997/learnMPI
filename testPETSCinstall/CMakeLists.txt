@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 3.10)
+project(PETScTest)
+
+# 设置 PETSc 的安装路径
+set(PETSC_DIR "/root/Cppackage/petsc")  # 替换为你的 PETSc 安装路径
+
+# 包含 PETSc 头文件路径
+include_directories(${PETSC_DIR}/include)
+
+# 查找MPI库
+find_package(MPI REQUIRED)
+
+
+# 添加可执行文件
+add_executable(main main.cpp)
+
+# 包含 MPI 头文件路径
+target_include_directories(main PRIVATE ${MPI_INCLUDE_PATH})
+
+# 链接 PETSc 库
+target_link_directories(main PRIVATE ${PETSC_DIR}/lib)
+target_link_libraries(main PRIVATE petsc ${MPI_C_LIBRARIES})
