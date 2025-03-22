@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         { // 向各子进程传递信息
             rows = dest <= remainderNR ? SendNR + 1 : SendNR;
             cout << "Sending " << rows << " rows to task " << dest << " offset= " << offset << endl;
-            MPI_Send(&A[offset][0], rows * NCA, MPI_DOUBLE, dest, 3, MPI_COMM_WORLD);
+            MPI_Send(&A[offset][0], rows * NCA, MPI_DOUBLE, dest, 3, MPI_COMM_WORLD); // 注意：Send和recv的tag要对应，或者使用同一tag要顺序相同
             MPI_Send(&offset, 1, MPI_INT, dest, 1, MPI_COMM_WORLD);
             MPI_Send(&rows, 1, MPI_INT, dest, 2, MPI_COMM_WORLD);
             
