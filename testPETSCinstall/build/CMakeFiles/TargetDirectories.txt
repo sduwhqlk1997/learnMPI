@@ -1,3 +1,0 @@
-/root/CppCode/LearnMPI/testPETSCinstall/build/CMakeFiles/main.dir
-/root/CppCode/LearnMPI/testPETSCinstall/build/CMakeFiles/edit_cache.dir
-/root/CppCode/LearnMPI/testPETSCinstall/build/CMakeFiles/rebuild_cache.dir
