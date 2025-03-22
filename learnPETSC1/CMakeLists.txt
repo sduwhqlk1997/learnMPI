@@ -3,7 +3,6 @@ project(PETScTest)
 
 # 设置 PETSc 的安装路径
 set(PETSc_DIR "/root/Cppackage/petsc")  # 替换为你的 PETSc 安装路径
-#set(PETSc_DIR $ENV{PETSC_DIR})  # 替换为你的 PETSc 安装路径
 
 # 包含 PETSc 头文件路径
 include_directories(${PETSc_DIR}/include)
@@ -20,5 +19,4 @@ target_include_directories(main PRIVATE ${MPI_INCLUDE_PATH})
 
 # 链接 PETSc 库
 target_link_directories(main PRIVATE ${PETSc_DIR}/lib)
-#target_link_directories(main PRIVATE $ENV{LD_LIBRARY_PATH})
 target_link_libraries(main PRIVATE petsc ${MPI_C_LIBRARIES})

@@ -1,0 +1,1 @@
+成功测试了petsc的安装（office laptop）
