@@ -1,1 +1,2 @@
-成功测试了petsc的安装（office laptop）
+PETSC for PDE 的算例1
+逼近自然数e
