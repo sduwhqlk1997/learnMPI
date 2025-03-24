@@ -26,7 +26,5 @@ int main(int argc, char *argv[]){
     err = abs(globalsum-e)/e;
     PetscPrintf(PETSC_COMM_WORLD,"err=%17.15f\n",err);
     PetscCall(PetscFinalize());
-    MPI_Finalize();
-    cout<<"a"<<endl;
     return 0;
 }
