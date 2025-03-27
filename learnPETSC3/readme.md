@@ -26,3 +26,5 @@ MatSetFromOptions 可以处理的选项包括（但不限于）：
 
 其他矩阵属性：如是否对称、是否正定等。
 3. 在运行该程序时，使用 <-mat_view> 可查看矩阵；使用 <-mat_view ::ascii_dense> 可用稠密形式输出
+4. 一些其他的运行命令
+![alt text](image-3.png)
