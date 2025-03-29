@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
     PetscCall(KSPCreate(PETSC_COMM_WORLD,&ksp));
     PetscCall(KSPSetOperators(ksp,A,A));
     PetscCall(KSPSetFromOptions(ksp));
-    PetscCall(VecDuplicate(b,&x));
+    PetscCall(VecDuplicate(b,&x)); // 创建一个与 b 相同大小的向量 x
     PetscCall(KSPSolve(ksp,b,x));
     PetscCall(VecView(x,PETSC_VIEWER_STDOUT_WORLD));
 
