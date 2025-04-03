@@ -48,5 +48,29 @@ int main(int argc, char* argv[]){
         PetscCall(VecSetValues(xexact,1,&i,&xval,INSERT_VALUES));
     }
     //从示例代码的第49行开始
+    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY)); 
+    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(VecAssemblyBegin(xexact));
+    PetscCall(VecAssemblyEnd(xexact));
+    PetscCall(MatMult(A,xexact,b));
 
+    /*设置KSP求解器*/
+    PetscCall(KSPCreate(PETSC_COMM_WORLD,&ksp));
+    PetscCall(KSPSetOperators(ksp,A,A));
+    PetscCall(KSPSetFromOptions(ksp));
+    PetscCall(KSPSolve(ksp,b,x));
+
+    /*计算误差*/
+    PetscCall(VecAXPY(x,-1.0,xexact)); // 计算结果被存在x中
+    PetscCall(VecNorm(x,NORM_2,&errnorm));
+    PetscCall(PetscPrintf(PETSC_COMM_WORLD,"error for m = %d system is |x-xexact|_2=%.1e\n",m,errnorm));
+
+    /*释放内存*/
+    PetscCall(KSPDestroy(&ksp));
+    PetscCall(MatDestroy(&A));
+    PetscCall(VecDestroy(&x));
+    PetscCall(VecDestroy(&b));
+    PetscCall(VecDestroy(&xexact));
+    PetscCall(PetscFinalize());
+    return 0;
 }
