@@ -3,6 +3,10 @@
 ## 程序运行命令
 ### 正常运行
 `./main -da_refine 4 -ksp_monitor -ksp_monitor_solution draw -draw_pause 0.1`
+
+`mpiexec -n 4 ./main -da_refine 7 -ksp_type cg -pc_type bjacobi -sub_pc_type icc -ksp_converged_reason`
+
+`for N in 1 2 3 4 5; do ./main -da_refine $N -ksp_converged_reason -ksp_type cg -pc_type none; done`
 ### Debug
 
 # 笔记
