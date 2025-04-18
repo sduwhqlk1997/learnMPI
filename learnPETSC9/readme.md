@@ -25,3 +25,7 @@ SNES 学习
 3. `DMDASNESFunctionFn` 是 PETSc 库中定义的一个函数指针类型。它指向一个特定签名的函数，用于计算残差函数（Residual Function）。
    
     `DMDASNESFunctionFn` 的典型定义为：`typedef PetscErrorCode (*DMDASNESFunctionFn)(SNES, Vec, Vec, void*);`
+
+# 注：
+
+main.cpp外部函数定义未完成、poissonfunctions.cpp仅完成了`Poisson$d$DFunctionLocal` 函数的定义
