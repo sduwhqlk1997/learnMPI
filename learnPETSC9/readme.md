@@ -1,6 +1,7 @@
 # 代码内容
 SNES 学习
 ## 程序运行命令
+mpiexec -n 8 ./main -fsh_problem manupoly -fsh_dim 3 -ksp_converged_reason -da_refine 6
 ### 正常运行可比矩阵近似值
 ### Debug
 
