@@ -105,7 +105,7 @@ extern PetscErrorCode Form3DUExact(DMDALocalInfo *, Vec, PoissonCtx *);
 static DMDASNESFunctionFn *residual_ptr[3] = {
     (DMDASNESFunctionFn *)&Poisson1DFunctionLocal,
     (DMDASNESFunctionFn *)&Poisson2DFunctionLocal,
-    (DMDASNESFunctionFn *)&Poisson1DFunctionLocal};
+    (DMDASNESFunctionFn *)&Poisson3DFunctionLocal};
 
 static DMDASNESJacobianFn *jacobian_ptr[3] = {
     (DMDASNESJacobianFn *)&Poisson1DJacobianLocal,
