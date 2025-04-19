@@ -301,3 +301,65 @@ int main(int argc, char *argv[])
 }
 
 // 示例代码288行
+PetscErrorCode Form1DUExact(DMDALocalInfo *info, Vec u, PoissonCtx *user)
+{
+    PetscInt i;
+    PetscReal xmax[1], xmin[1], hx, x, *au;
+    PetscCall(DMGetLocalBoundingBox(info->da, xmin, xmax));
+    hx = (xmax[0] - xmin[0]) / (info->mx - 1);
+    PetscCall(DMDAVecGetArray(info->da, u, &au));
+    for (i = info->xs; i < info->xs + info->xm; i++)
+    {
+        x = xmin[0] + i * hx;
+        au[i] = user->g_bdry(x, 0.0, 0.0, user);
+    }
+    PetscCall(DMDAVecRestoreArray(info->da, u, &au));
+    return 0;
+}
+
+PetscErrorCode Form2DUExact(DMDALocalInfo *info, Vec u, PoissonCtx *user)
+{
+    PetscInt i, j;
+    PetscReal xymin[2], xymax[2], hx, hy, x, y, **au;
+    PetscCall(DMGetBoundingBox(info->da, xymin, xymax));
+    hx = (xymax[0] - xymin[0]) / (info->mx - 1);
+    hy = (xymax[1] - xymin[1]) / (info->my - 1);
+    PetscCall(DMDAVecGetArray(info->da, u, &au));
+    for (j = info->ys; j < info->ys + info->ym; j++)
+    {
+        y = xymin[1] + j * hy;
+        for (i = info->xs; i < info->xs + info->xm; i++)
+        {
+            x = xymin[0] + i * hx;
+            au[j][i] = user->g_bdry(x, y, 0.0, user);
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(info->da, u, &au));
+    return 0;
+}
+
+PetscErrorCode Form3DUExact(DMDALocalInfo *info, Vec u, PoissonCtx *user)
+{
+    PetscInt i, j, k;
+    PetscReal xyzmin[3], xyzmax[3], hx, hy, hz, x, y, z, ***au;
+    PetscCall(DMGetBoundingBox(info->da, xyzmin, xyzmax));
+    hx = (xyzmax[0] - xyzmin[0]) / (info->mx - 1);
+    hy = (xyzmax[1] - xyzmin[1]) / (info->my - 1);
+    hz = (xyzmax[2] - xyzmin[2]) / (info->mz - 1);
+    PetscCall(DMDAVecGetArray(info->da, u, &au));
+    for (k = info->zs; k < info->zs + info->zm; k++)
+    {
+        z = xyzmin[2] + k * hz;
+        for (j = info->ys; j < info->ys + info->ym; j++)
+        {
+            y = xyzmin[1] + j * hy;
+            for (i = info->xs; i < info->xs + info->xm; i++)
+            {
+                x = xyzmin[0] + i * hx;
+                au[k][j][i] = user->g_bdry(x, y, z, user);
+            }
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(info->da, u, &au));
+    return 0;
+}
