@@ -1,8 +1,14 @@
 # 代码内容
 SNES 学习
 ## 程序运行命令
+### 普通运行
 mpiexec -n 8 ./main -fsh_problem manupoly -fsh_dim 3 -ksp_converged_reason -da_refine 6
-### 正常运行可比矩阵近似值
+### 使用 additive Schwarz method (ASM) 预处理
+-pc_type asm -pc_asm_overlap X -sub_pc_type Y
+
+-pc_asm_blocks：设置子网格数，否则默认每个线程分配一个子网格
+
+注：By default, -pc_type asm assigns one subgrid to each MPI rank, thus the number of processes equals the number of subgrids.
 ### Debug
 
 # 笔记
