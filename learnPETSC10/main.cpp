@@ -127,5 +127,7 @@ int main(int argc, char *argv[])
                                "view right-hand side to STDOUT",
                                "main.cpp", view_f, &(view_f), NULL));
     PetscOptionsEnd();
+
+    
     return 0;
 }
