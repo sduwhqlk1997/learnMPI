@@ -11,7 +11,7 @@ static char help[] =
     "function; use -ph_no_gradient -snes_fd_function.\n\n";
 
 #include <petsc.h>
-#include "quadrature.h"
+#include "./head/quadrature.h"
 
 typedef struct
 {
