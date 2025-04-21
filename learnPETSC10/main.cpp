@@ -128,6 +128,27 @@ int main(int argc, char *argv[])
                                "main.cpp", view_f, &(view_f), NULL));
     PetscOptionsEnd();
 
-    
+    PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
+        DM_BOUNDARY_NONE, DMDA_STENCIL_BOX,2,2,PETSC_DECIDE,PETSC_DECIDE,1,1,NULL,NULL,&da));
+    PetscCall(DMSetFromOptions(da));
+    PetscCall(DMSetUp(da));
+    PetscCall(DMSetApplicationContext(da,&user));
+    PetscCall(DMDASetUniformCoordinates(da,0.0,1.0,0.0,1.0,-1.0,-1.0));
+    PetscCall(DMDAGetLocalInfo(da,&info));
+
+    PetscCall(SNESCreate(PETSC_COMM_WORLD,&snes));
+    PetscCall(SNESSetDM(snes,da));
+    if (!no_objective) {
+        PetscCall(DMDASNESSetObjectiveLocal(da, (DMDASNESObjectiveFn *)FormObjectiveLocal, &user));
+    }
+    if (no_gradient) {
+        PetscCall(PetscOptionsSetValue(NULL,"snes_fd_function_eps","0,0"));
+    } else {
+        PetscCall(DMDASNESSetFunctionLocal(da,INSERT_VALUES,(DMDASNESFunctionFn *)FormFunctionLocal,&user));
+    }
+    PetscCall(SNESSetFromOptions(snes));
+
+    // set initial iterate and right-hand side
+    // (示例代码145行)
     return 0;
 }
