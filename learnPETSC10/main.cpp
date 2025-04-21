@@ -128,27 +128,100 @@ int main(int argc, char *argv[])
                                "main.cpp", view_f, &(view_f), NULL));
     PetscOptionsEnd();
 
-    PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
-        DM_BOUNDARY_NONE, DMDA_STENCIL_BOX,2,2,PETSC_DECIDE,PETSC_DECIDE,1,1,NULL,NULL,&da));
+    PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE,
+                           DM_BOUNDARY_NONE, DMDA_STENCIL_BOX, 2, 2, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, NULL, &da));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
-    PetscCall(DMSetApplicationContext(da,&user));
-    PetscCall(DMDASetUniformCoordinates(da,0.0,1.0,0.0,1.0,-1.0,-1.0));
-    PetscCall(DMDAGetLocalInfo(da,&info));
+    PetscCall(DMSetApplicationContext(da, &user));
+    PetscCall(DMDASetUniformCoordinates(da, 0.0, 1.0, 0.0, 1.0, -1.0, -1.0));
+    PetscCall(DMDAGetLocalInfo(da, &info));
 
-    PetscCall(SNESCreate(PETSC_COMM_WORLD,&snes));
-    PetscCall(SNESSetDM(snes,da));
-    if (!no_objective) {
+    PetscCall(SNESCreate(PETSC_COMM_WORLD, &snes));
+    PetscCall(SNESSetDM(snes, da));
+    if (!no_objective)
+    {
         PetscCall(DMDASNESSetObjectiveLocal(da, (DMDASNESObjectiveFn *)FormObjectiveLocal, &user));
     }
-    if (no_gradient) {
-        PetscCall(PetscOptionsSetValue(NULL,"snes_fd_function_eps","0,0"));
-    } else {
-        PetscCall(DMDASNESSetFunctionLocal(da,INSERT_VALUES,(DMDASNESFunctionFn *)FormFunctionLocal,&user));
+    if (no_gradient)
+    {
+        PetscCall(PetscOptionsSetValue(NULL, "snes_fd_function_eps", "0,0"));
+    }
+    else
+    {
+        PetscCall(DMDASNESSetFunctionLocal(da, INSERT_VALUES, (DMDASNESFunctionFn *)FormFunctionLocal, &user));
     }
     PetscCall(SNESSetFromOptions(snes));
 
     // set initial iterate and right-hand side
-    // (示例代码145行)
+    PetscCall(DMCreateGlobalVector(da, &u_initial));
+    PetscCall(VecSet(u_initial, 0.5));
+    switch (problem)
+    {
+    case CONSTANT:
+        if (exact_init)
+        {
+            PetscCall(VecSet(u_initial, 1.0));
+        }
+        user.f = &f_constant;
+        break;
+    case COSINES:
+        if (exact_init)
+        {
+            PetscCall(GetVecFromFunction(&info, u_initial, &u_exact_cosines, &user));
+        }
+        user.f = &f_cosines;
+        break;
+    default:
+        SETERRQ(PETSC_COMM_SELF, 4, "unknown problem type\n");
+    }
+
+    // optionally view right-hand-side on initial grid
+    if (view_f)
+    {
+        Vec vf;
+        PetscCall(VecDuplicate(u_initial, &vf));
+        switch (problem)
+        {
+        case CONSTANT:
+            PetscCall(VecSet(vf, 1.0));
+            break;
+        case COSINES:
+            PetscCall(GetVecFromFunction(&info, vf, &f_cosines, &user));
+            break;
+        }
+        PetscCall(VecView(vf, PETSC_VIEWER_STDOUT_WORLD));
+        VecDestroy(&vf);
+    }
+
+    // solve and clean up
+    PetscCall(SNESSolve(snes, NULL, u_initial));
+    PetscCall(VecDestroy(&u_initial));
+    PetscCall(DMDestroy(&da));
+    PetscCall(SNESGetSolution(snes, &u));
+    PetscCall(SNESGetDM(snes, &da));
+    PetscCall(DMDAGetLocalInfo(da, &info));
+
+    // evaluate numerical error
+    PetscCall(VecDuplicate(u, &u_exact));
+    switch (problem)
+    {
+    case CONSTANT:
+        PetscCall(VecSet(u_exact, 1.0));
+        break;
+    case COSINES:
+        PetscCall(GetVecFromFunction(&info, u_exact, &u_exact_cosines, &user));
+        break;
+    }
+    PetscCall(VecAXPY(u, -1.0, u_exact));
+    PetscCall(VecNorm(u, NORM_INFINITY, &err));
+    PetscCall(PetscPrintf(PETSC_COMM_WORLD,
+                          "done on %d x %d grid with p=%.3f ...\n"
+                          "  numerical error:  |u-u_exact|_inf = %.3e\n",
+                          info.mx, info.my, user.p, err));
+
+    PetscCall(VecDestroy(&u_exact));
+    PetscCall(SNESDestroy(&snes));
+    PetscCall(PetscFinalize());
     return 0;
 }
+// 示例代码 211 行
