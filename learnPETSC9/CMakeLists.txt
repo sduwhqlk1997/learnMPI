@@ -5,9 +5,9 @@ project(PETScTest)
 #add_definitions(-DDEBUG) # 定义 DEBUG 宏
 # 设置 PETSc 的安装路径
 
-#set(PETSc_DIR "/root/Cppackage/petsc")  # 替换为你的 PETSc 安装路径(debug)
+set(PETSc_DIR "/home/qiu/qlk/Cppackage/petsc")  # 替换为你的 PETSc 安装路径(debug)
 
-set(PETSc_DIR "/root/Cppackage/petsc_ndebug")  # 替换为你的 PETSc 安装路径
+#set(PETSc_DIR "/root/Cppackage/petsc_ndebug")  # 替换为你的 PETSc 安装路径
 
 #头文件路径
 include_directories(${PETSc_DIR}/include head)
