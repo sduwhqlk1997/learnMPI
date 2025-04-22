@@ -224,4 +224,131 @@ int main(int argc, char *argv[])
     PetscCall(PetscFinalize());
     return 0;
 }
-// 示例代码 211 行
+
+PetscErrorCode GetVecFromFunction(DMDALocalInfo *info, Vec w,
+                                  PetscReal (*fcn)(PetscReal, PetscReal, PetscReal, PetscReal),
+                                  PHelmCtx *user)
+{
+    const PetscReal hx = 1.0 / (info->mx - 1), hy = 1.0 / (info->my - 1);
+    PetscReal x, y, **aw;
+    PetscInt i, j;
+    PetscCall(DMDAVecGetArray(info->da, w, &aw));
+    for (j = info->ys; j < info->ys + info->ym; j++)
+    {
+        y = j * hy;
+        for (i = info->xs; i < info->xs + info->xm; i++)
+        {
+            x = i * hx;
+            aw[j][i] = (*fcn)(x, y, user->p, user->eps);
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(info->da, w, &aw));
+    return 0;
+}
+
+// STARTFEM
+static PetscReal xiL[4] = {1.0, -1.0, -1.0, 1.0},
+                 etaL[4] = {1.0, 1.0, -1.0, -1.0}; // 参考单元顶点坐标
+
+static PetscReal chi(PetscInt L, PetscReal xi, PetscReal eta)
+{
+    return 0.25 * (1.0 + xiL[L] * xi) * (1.0 + etaL[L] * eta);
+}
+
+// evaluate v(Xi,eta) on reference element using local node numbering
+static PetscReal eval(const PetscReal v[4], PetscReal xi, PetscReal eta)
+{
+    return v[0] * chi(0, xi, eta) + v[1] * chi(1, xi, eta) + v[2] * chi(2, xi, eta) + v[3] * chi(3, xi, eta);
+}
+
+typedef struct
+{
+    PetscReal xi, eta;
+} gradRef;
+
+static gradRef dchi(PetscInt L, PetscReal xi, PetscReal eta)
+{
+    const gradRef result = {0.25 * xiL[L] * (1.0 + etaL[L] * eta),
+                            0.25 * etaL[L] * (1.0 + xiL[L] * xi)};
+    return result;
+}
+
+// evaluate partial derivs of v(xi,eta) on reference element
+static gradRef deval(const PetscReal v[4], PetscReal xi, PetscReal eta)
+{
+    gradRef sum = {0.0, 0.0}, tmp;
+    PetscInt L;
+    for (L = 0; L < 4; L++)
+    {
+        tmp = dchi(L, xi, eta);
+        sum.xi += v[L] * tmp.xi;
+        sum.eta += v[L] * tmp.eta;
+    }
+    return sum;
+}
+
+static PetscReal GradInnerProd(PetscReal hx, PetscReal hy, gradRef du, gradRef dv)
+{
+    const PetscReal cx = 4.0 / (hx * hx), cy = 4.0 / (hy * hy);
+    return cx * du.xi * dv.xi + cy * du.eta * dv.eta;
+}
+
+static PetscReal GradPow(PetscReal hx, PetscReal hy, gradRef du, PetscReal P, PetscReal eps)
+{
+    return PetscPowScalar(GradInnerProd(hx, hy, du, du) + eps * eps, P / 2.0);
+}
+// ENDFEM
+
+// STARTOBJECTIVE
+static PetscReal ObjIntegrandRef(DMDALocalInfo *info, const PetscReal ff[4], const PetscReal uu[4], PetscReal xi, PetscReal eta, PHelmCtx *user)
+{
+    const gradRef du = deval(uu, xi, eta);
+    const PetscReal hx = 1.0 / (info->mx - 1), hy = 1.0 / (info->my - 1), u = eval(uu, xi, eta);
+    return GradPow(hx, hy, du, user->p, 0.0) / user->p + 0.5 * u * u - eval(ff, xi, eta) * u;
+}
+
+PetscErrorCode FormObjectiveLocal(DMDALocalInfo *info, PetscReal **au, PetscReal *obj, PHelmCtx *user)
+{
+    const PetscReal hx = 1.0 / (info->mx - 1), hy = 1.0 / (info->my - 1);
+    const Quad1D q = gausslegendre[user->quadpts - 1];
+    PetscReal x, y, lobj = 0.0;
+    PetscInt i, j, r, s;
+    MPI_Comm com;
+
+    // loop over all elements
+    for (j = info->ys; j < info->ys + info->ym; j++)
+    {
+        if (j == 0)
+            continue;
+        y = j * hy;
+        for (i = info->xs; i < info->xs + info->xm; i++)
+        {
+            if (i == 0)
+                continue;
+            x = i * hx;
+            const PetscReal ff[4] = {user->f(x, y, user->p, user->eps),
+                                     user->f(x - hx, y, user->p, user->eps),
+                                     user->f(x - hx, y - hy, user->p, user->eps),
+                                     user->f(x, y - hy, user->p, user->eps)};
+            const PetscReal uu[4] = {au[j][i], au[j][i - 1], au[j - 1][i - 1], au[j - 1][i]};
+
+            // loop over quarature points on this element
+            for (r = 0; r < q.n; r++)
+            {
+                for (s = 0; s < q.n; s++)
+                {
+                    lobj += q.w[r] * q.w[s] * ObjIntegrandRef(info, ff, uu, q.xi[r], q.xi[s], user);
+                }
+            }
+        }
+    }
+    lobj *= hx * hy /4.0; // 坐标变换
+    PetscCall(PetscObjectGetComm((PetscObject)(info->da),&com));
+    PetscCall(MPI_Allreduce(&lobj,obj,1,MPIU_REAL,MPIU_SUM,com));
+    PetscCall(PetscLogFlops(129*info->xm*info->ym));
+    return 0;
+}
+//ENDOBJECTIVE
+
+//STARTFUNCTION
+// 示例代码第341行
