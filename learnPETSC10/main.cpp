@@ -351,4 +351,10 @@ PetscErrorCode FormObjectiveLocal(DMDALocalInfo *info, PetscReal **au, PetscReal
 //ENDOBJECTIVE
 
 //STARTFUNCTION
-// 示例代码第341行
+static PetscReal IntegrandRef(DMDALocalInfo *info, PetscInt L, const PetscReal ff[4], const PetscReal uu[4],PetscReal xi, PetscReal eta, PHelmCtx *user){
+    const gradRef du = deval(uu,xi,eta),
+                  dchiL = dchi(L,xi,eta);
+    const PetscReal hx = 1.0 / (info->mx-1), hy = 1.0 / (info->my-1);
+    return GradPow(hx,hy,du,user->p-2.0,user->eps) * GradInnerProd(hx,hy,du,dchiL) + (eval(uu,xi,eta) - eval(ff,xi,eta)) * chi(L,xi,eta);
+}
+// 352
