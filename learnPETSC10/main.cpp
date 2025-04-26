@@ -342,19 +342,73 @@ PetscErrorCode FormObjectiveLocal(DMDALocalInfo *info, PetscReal **au, PetscReal
             }
         }
     }
-    lobj *= hx * hy /4.0; // 坐标变换
-    PetscCall(PetscObjectGetComm((PetscObject)(info->da),&com));
-    PetscCall(MPI_Allreduce(&lobj,obj,1,MPIU_REAL,MPIU_SUM,com));
-    PetscCall(PetscLogFlops(129*info->xm*info->ym));
+    lobj *= hx * hy / 4.0; // 坐标变换
+    PetscCall(PetscObjectGetComm((PetscObject)(info->da), &com));
+    PetscCall(MPI_Allreduce(&lobj, obj, 1, MPIU_REAL, MPIU_SUM, com));
+    PetscCall(PetscLogFlops(129 * info->xm * info->ym));
     return 0;
 }
-//ENDOBJECTIVE
+// ENDOBJECTIVE
 
-//STARTFUNCTION
-static PetscReal IntegrandRef(DMDALocalInfo *info, PetscInt L, const PetscReal ff[4], const PetscReal uu[4],PetscReal xi, PetscReal eta, PHelmCtx *user){
-    const gradRef du = deval(uu,xi,eta),
-                  dchiL = dchi(L,xi,eta);
-    const PetscReal hx = 1.0 / (info->mx-1), hy = 1.0 / (info->my-1);
-    return GradPow(hx,hy,du,user->p-2.0,user->eps) * GradInnerProd(hx,hy,du,dchiL) + (eval(uu,xi,eta) - eval(ff,xi,eta)) * chi(L,xi,eta);
+// STARTFUNCTION
+static PetscReal IntegrandRef(DMDALocalInfo *info, PetscInt L, const PetscReal ff[4], const PetscReal uu[4], PetscReal xi, PetscReal eta, PHelmCtx *user)
+{
+    const gradRef du = deval(uu, xi, eta),
+                  dchiL = dchi(L, xi, eta);
+    const PetscReal hx = 1.0 / (info->mx - 1), hy = 1.0 / (info->my - 1);
+    return GradPow(hx, hy, du, user->p - 2.0, user->eps) * GradInnerProd(hx, hy, du, dchiL) + (eval(uu, xi, eta) - eval(ff, xi, eta)) * chi(L, xi, eta);
 }
 // 352
+PetscErrorCode FormFunctionLocal(DMDALocalInfo *info, PetscReal **au, PetscReal **FF, PHelmCtx *user)
+{
+    const PetscReal hx = 1.0 / (info->mx - 1), hy = 1.0 / (info->my - 1);
+    const Quad1D q = gausslegendre[user->quadpts - 1];
+    const PetscInt li[4] = {0, -1, -1, 0}, lj[4] = {0, 0, -1, -1};
+    PetscReal x, y;
+    PetscInt i, j, l, r, s, PP, QQ;
+
+    // clear residuals
+    for (j = info->ys; j < info->ys + info->ym; j++)
+        for (i = info->xs; i < info->xs + info->xm; i++)
+            FF[j][i] = 0.0;
+
+    // loop over all elements
+    for (j = info->ys; j <= info->ys + info->ym; j++)
+    {
+        if ((j == 0) || (j > info->my - 1))
+            continue;
+        y = j * hy;
+        for (i = info->xs; i <= info->xs + info->xm; i++)
+        {
+            if ((i == 0) || (i > info->mx - 1))
+                continue;
+            x = i * hx;
+            const PetscReal ff[4] = {user->f(x, y, user->p, user->eps),
+                                     user->f(x - hx, y, user->p, user->eps),
+                                     user->f(x - hx, y - hy, user->p, user->eps),
+                                     user->f(x, y - hy, user->p, user->eps)};
+            const PetscReal uu[4] = {au[j][i], au[j][i - 1], au[j - 1][i - 1], au[j - 1][i]};
+            // loop over corners of element i,j
+            for (l = 0; l < 4; l++)
+            {
+                PP = i + li[l];
+                QQ = j + lj[l];
+                // only update residual if we own node
+                if (PP >= info->xs && PP < info->xs + info->xm && QQ >= info->ys && QQ < info->ys + info->ym)
+                {
+                    // loop over quadrature points
+                    for (r = 0; r < q.n; r++)
+                    {
+                        for (s = 0; s < q.n; s++)
+                        {
+                            FF[QQ][PP] += 0.25 * hx * hy * q.w[r] * q.w[s] * IntegrandRef(info, l, ff, uu, q.xi[r], q.xi[s], user);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    PetscCall(PetscLogFlops((5 + q.n * q.n * 149) * (info->xm + 1) * (info->ym + 1)));
+    return 0;
+}
+//ENDFUNCTION
