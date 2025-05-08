@@ -16,7 +16,10 @@ PetscReal GaussIntegral(integrandFun,
     PetscReal,PetscReal,
     PetscInt); // 数值积分
 PetscErrorCode formMatrix(DM, Mat,PHelmCtx*);
-PetscErrorCode formRHS(DM, Vec);
+PetscErrorCode formRHS(DM, Vec, integrandFun, PHelmCtx*);
+static PetscReal f_RHS(PetscReal x, PetscReal y){
+    return (-y * (1-y)*(1-x-x*x/2) - x*(1-x/2)*(-3*y-y*y)) * PetscExpReal(x+y);
+}
 PetscErrorCode formExact(DM, Vec);
 
 // FEM basis fun
@@ -40,6 +43,7 @@ int main(int argc, char* argv[]){
     #endif
     DM da;
     Mat A;
+    Vec b;
     DMDALocalInfo info;
     PHelmCtx user;
     user.quadpts = 3;
@@ -52,11 +56,18 @@ int main(int argc, char* argv[]){
 
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
+    // create linear system matrix A
     PetscCall(DMCreateMatrix(da,&A));
     //MatSetType(A, MATSBAIJ);
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrix(da,A,&user));
     PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+
+    // create RHS b;
+    PetscCall(DMCreateGlobalVector(da,&b));
+    PetscCall(VecSet(b, 0.0));
+    PetscCall(formRHS(da, b, f_RHS, &user));
+    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
     PetscCall(DMDAGetLocalInfo(da,&info));
 
@@ -66,6 +77,7 @@ int main(int argc, char* argv[]){
     
     PetscCall(MatDestroy(&A)); // 销毁矩阵
     PetscCall(DMDestroy(&da));
+    PetscCall(VecDestroy(&b));
     PetscCall(PetscFinalize());
     return 0;
 }
@@ -133,3 +145,35 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
     return PETSC_SUCCESS;
 }
 
+PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
+    DMDALocalInfo info;
+    PetscReal hx, hy, **ab, row, col, x, y, kx, ky, tx, ty;
+    const PetscInt li[4] = {0,1,1,0}, lj[4] = {0,0,1,1};
+
+    PetscCall(DMDAGetLocalInfo(da,&info));
+    hx = 1.0/(info.mx-1); hy = 1.0/(info.my-1);
+    ky = hy / 2.0; kx = hx / 2.0;
+    PetscCall(DMDAVecGetArray(da,b,&ab));
+    for(PetscInt j = info.ys; j<info.ys+info.ym; j++){
+        if(j==info.my-1){ // 触碰上边界
+            continue;
+        }
+        y = j * hy;
+        ty = y + ky;
+        for(PetscInt i = info.xs; i < info.xs + info.xm; i++){
+            if(i==info.mx-1){
+                continue;
+            }
+            x = i * hx;
+            tx = x + kx;
+            for(PetscInt l = 0; l < 4; l++){
+                integrandFun IntFun=[l,kx,ky,tx,ty,f](PetscReal x, PetscReal y){
+                    return chi(l,x,{0,0},y) * f(kx*x+tx,ky*y+ty);
+                };
+                ab[j+lj[l]][i+li[l]] += GaussIntegral(IntFun, hx, hy, user->quadpts);
+            }
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(da, b, &ab));
+    return PETSC_SUCCESS;
+}
