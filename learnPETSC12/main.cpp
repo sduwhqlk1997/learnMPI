@@ -6,6 +6,7 @@ static char help[] = "A structured-grid Possion solver using DMDA+KSP, FEM2D.\n.
 
 typedef struct
 {
+    PetscReal Lx,Ly;
     PetscInt quadpts;
 }PHelmCtx;
 
@@ -55,6 +56,8 @@ int main(int argc, char* argv[]){
     DMDALocalInfo info;
     PHelmCtx user;
     user.quadpts = 3;
+    user.Lx = 2.0;
+    user.Ly = 1.0;
 
     PetscCall(PetscInitialize(&argc,&argv,NULL,help));
 
@@ -62,21 +65,23 @@ int main(int argc, char* argv[]){
         DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 3, 3, 
         PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, NULL, &da));
     //PetscCall(DMSetType(da,DMPLEX));
+    PetscCall(DMSetApplicationContext(da,&user));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
-
+    PetscCall(DMDASetUniformCoordinates(da,0.0,user.Lx,0.0,user.Ly,0.0,0.0));
+    
     // create linear system matrix A
     PetscCall(DMCreateMatrix(da,&A));
     //MatSetType(A, MATSBAIJ);
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrix(da,A,&user));
-    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
 
     // create RHS b;
     PetscCall(DMCreateGlobalVector(da,&b));
     PetscCall(VecSet(b, 0.0));
     PetscCall(formRHS(da, b, f_RHS, &user));
-    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
     PetscCall(DMDAGetLocalInfo(da,&info));
 
@@ -126,7 +131,7 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
     PetscInt nrows, ncols;
 
     PetscCall(DMDAGetLocalInfo(da,&info));
-    hx = 1.0/(info.mx-1); hy = 1.0/(info.my-1);
+    hx = user->Lx/(info.mx-1);  hy = user->Ly/(info.my-1);
     for(PetscInt j=info.ys; j<info.ys+info.ym; j++){// 遍历定点为(i,j),(i+1,j),(i+1,j+1),(i,j+1)的单元
         if(j==info.my-1)
             continue;
@@ -156,24 +161,25 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
 
 PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
     DMDALocalInfo info;
-    PetscReal hx, hy, **ab, row, col, x, y, kx, ky, tx, ty;
+    PetscReal hx, hy, **ab, row, col, x, y, kx, ky, tx, ty, xymin[2], xymax[2];
     const PetscInt li[4] = {0,1,1,0}, lj[4] = {0,0,1,1};
 
     PetscCall(DMDAGetLocalInfo(da,&info));
-    hx = 1.0/(info.mx-1); hy = 1.0/(info.my-1);
+    PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
+    hx = user->Lx/(info.mx-1); hy = user->Ly/(info.my-1);
     ky = hy / 2.0; kx = hx / 2.0;
     PetscCall(DMDAVecGetArray(da,b,&ab));
     for(PetscInt j = info.ys; j<info.ys+info.ym; j++){
         if(j==info.my-1){ // 触碰上边界
             continue;
         }
-        y = j * hy;
+        y = xymin[1]+j * hy;
         ty = y + ky;
         for(PetscInt i = info.xs; i < info.xs + info.xm; i++){
             if(i==info.mx-1){
                 continue;
             }
-            x = i * hx;
+            x = xymin[0]+i * hx;
             tx = x + kx;
             for(PetscInt l = 0; l < 4; l++){
                 integrandFun IntFun=[l,kx,ky,tx,ty,f](PetscReal x, PetscReal y){
