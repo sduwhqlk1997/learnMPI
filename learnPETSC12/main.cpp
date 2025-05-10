@@ -15,10 +15,18 @@ using integrandFun = std::function<PetscReal(PetscReal,PetscReal)>;
 PetscReal GaussIntegral(integrandFun,
     PetscReal,PetscReal,
     PetscInt); // 数值积分
+
 PetscErrorCode formMatrix(DM, Mat,PHelmCtx*);
 PetscErrorCode formRHS(DM, Vec, integrandFun, PHelmCtx*);
+IS GetBoundIndex(DM);
+PetscErrorCode treateDirichletBound(Mat, Vec, IS);
+
 static PetscReal f_RHS(PetscReal x, PetscReal y){
     return (-y * (1-y)*(1-x-x*x/2) - x*(1-x/2)*(-3*y-y*y)) * PetscExpReal(x+y);
+}
+
+static PetscReal uExact(PetscReal x, PetscReal y){
+    return x*y*(1-x/2)*(1-y)*PetscExpReal(x+y);
 }
 PetscErrorCode formExact(DM, Vec);
 
@@ -53,21 +61,22 @@ int main(int argc, char* argv[]){
     PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
         DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 3, 3, 
         PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, NULL, &da));
-
+    //PetscCall(DMSetType(da,DMPLEX));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
+
     // create linear system matrix A
     PetscCall(DMCreateMatrix(da,&A));
     //MatSetType(A, MATSBAIJ);
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrix(da,A,&user));
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
 
     // create RHS b;
     PetscCall(DMCreateGlobalVector(da,&b));
     PetscCall(VecSet(b, 0.0));
     PetscCall(formRHS(da, b, f_RHS, &user));
-    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
     PetscCall(DMDAGetLocalInfo(da,&info));
 
@@ -177,3 +186,9 @@ PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
     PetscCall(DMDAVecRestoreArray(da, b, &ab));
     return PETSC_SUCCESS;
 }
+
+/*IS GetBoundIndex(DM da){
+    PetscInt *boundaryIndices;
+    PetscInt dim, boundaryCount = 0;
+    DMGetBoundingBox
+}*/
