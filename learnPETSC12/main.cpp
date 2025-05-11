@@ -87,6 +87,10 @@ int main(int argc, char* argv[]){
     //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
     treateDirichletBound(da, A, b,&user);
+
+    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
+
     PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
@@ -217,32 +221,34 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                 ab[j][i] = user->Dir(x,y); // 处理载荷矢量
                 row.i = i; row.j = j; row.k = 0; row.c = 0;
                 col[Nv].i = i; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
-                v[Nv++]=1;
-                if(i-1>0&j-1>0){
+                v[Nv]=1;
+                Nv++;
+                if(i-1>=0&j-1>=0){
                     col[Nv].i = i-1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
-                    v[Nv++]=0;
+                    v[Nv]=0;
+                    Nv++;
                 }
-                if(i>0&j-1>0){
+                if(i>=0&j-1>=0){
                     col[Nv].i = i; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
-                if(i+1<info.mx&j-1>0){
+                if(i+1<info.mx&j-1>=0){
                     col[Nv].i = i+1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
-                if(i-1>0&j>0){
+                if(i-1>=0&j>=0){
                     col[Nv].i = i-1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
-                if(i+1<info.mx&j>0){
+                if(i+1<info.mx&j>=0){
                     col[Nv].i = i+1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
-                if(i-1>0&j+1<info.my){
+                if(i-1>=0&j+1<info.my){
                     col[Nv].i = i-1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
-                if(i>0&j+1<info.my){
+                if(i>=0&j+1<info.my){
                     col[Nv].i = i; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv++]=0;
                 }
@@ -256,8 +262,8 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
         }
     }
     PetscCall(DMDAVecRestoreArray(da, b, &ab));
-    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
-    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
+    PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
     return PETSC_SUCCESS;
 }
 
