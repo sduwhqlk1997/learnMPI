@@ -4,13 +4,15 @@ static char help[] = "A structured-grid Possion solver using DMDA+KSP, FEM2D.\n.
 #include <unistd.h>
 #include "quadrature.h"
 
+
+
+using integrandFun = std::function<PetscReal(PetscReal,PetscReal)>;
 typedef struct
 {
     PetscReal Lx,Ly;
     PetscInt quadpts;
+    integrandFun Dir;
 }PHelmCtx;
-
-using integrandFun = std::function<PetscReal(PetscReal,PetscReal)>;
 //typedef PetscReal (*integrandFun)(PetscReal,PetscReal); // 被积函数
 //PetscReal GaussIntegral(std::function<PetscReal(PetscReal,PetscReal)>,PetscReal*,PetscReal*,PetscInt); // 数值积分
 PetscReal GaussIntegral(integrandFun,
@@ -20,7 +22,7 @@ PetscReal GaussIntegral(integrandFun,
 PetscErrorCode formMatrix(DM, Mat,PHelmCtx*);
 PetscErrorCode formRHS(DM, Vec, integrandFun, PHelmCtx*);
 IS GetBoundIndex(DM);
-PetscErrorCode treateDirichletBound(Mat, Vec, IS);
+PetscErrorCode treateDirichletBound(DM, Mat, Vec, PHelmCtx*);
 
 static PetscReal f_RHS(PetscReal x, PetscReal y){
     return (-y * (1-y)*(1-x-x*x/2) - x*(1-x/2)*(-3*y-y*y)) * PetscExpReal(x+y);
@@ -56,8 +58,9 @@ int main(int argc, char* argv[]){
     DMDALocalInfo info;
     PHelmCtx user;
     user.quadpts = 3;
-    user.Lx = 2.0;
-    user.Ly = 1.0;
+    user.Lx = 3.0;
+    user.Ly = 2.0;
+    user.Dir = uExact;
 
     PetscCall(PetscInitialize(&argc,&argv,NULL,help));
 
@@ -75,12 +78,16 @@ int main(int argc, char* argv[]){
     //MatSetType(A, MATSBAIJ);
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrix(da,A,&user));
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
 
     // create RHS b;
     PetscCall(DMCreateGlobalVector(da,&b));
     PetscCall(VecSet(b, 0.0));
     PetscCall(formRHS(da, b, f_RHS, &user));
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+
+    treateDirichletBound(da, A, b,&user);
+    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
     PetscCall(DMDAGetLocalInfo(da,&info));
@@ -154,8 +161,8 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
             }
         }
     }
-    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
-    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
+    PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
     return PETSC_SUCCESS;
 }
 
@@ -190,6 +197,67 @@ PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
         }
     }
     PetscCall(DMDAVecRestoreArray(da, b, &ab));
+    return PETSC_SUCCESS;
+}
+
+PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
+    DMDALocalInfo info;
+    PetscReal **ab, v[9], x, y, xymin[2], xymax[2], hy, hx;
+    MatStencil row, col[9];
+    PetscInt Nv;
+    PetscCall(DMDAGetLocalInfo(da,&info));
+    PetscCall(DMDAVecGetArray(da,b,&ab));
+    PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
+    hy = user->Ly/(info.my-1); hx = user->Lx/(info.mx-1);
+    for(PetscInt j = info.ys;j<info.ys+info.ym;j++){
+        for (PetscInt i = info.xs;i<info.xs+info.xm;i++){
+            if(j==0|i==0|j==info.my-1|i==info.mx-1){
+                Nv = 0;
+                y = xymin[1]+j*hy; x = xymin[0]+i*hx;
+                ab[j][i] = user->Dir(x,y); // 处理载荷矢量
+                row.i = i; row.j = j; row.k = 0; row.c = 0;
+                col[Nv].i = i; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
+                v[Nv++]=1;
+                if(i-1>0&j-1>0){
+                    col[Nv].i = i-1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i>0&j-1>0){
+                    col[Nv].i = i; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i+1<info.mx&j-1>0){
+                    col[Nv].i = i+1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i-1>0&j>0){
+                    col[Nv].i = i-1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i+1<info.mx&j>0){
+                    col[Nv].i = i+1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i-1>0&j+1<info.my){
+                    col[Nv].i = i-1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i>0&j+1<info.my){
+                    col[Nv].i = i; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                if(i+1<info.mx&j+1<info.my){
+                    col[Nv].i = i+1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+                    v[Nv++]=0;
+                }
+                PetscCall(MatSetValuesStencil(A,1,&row,Nv,col,v,INSERT_VALUES));
+                
+            }
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(da, b, &ab));
+    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
     return PETSC_SUCCESS;
 }
 
