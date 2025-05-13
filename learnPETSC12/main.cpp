@@ -75,6 +75,11 @@ int main(int argc, char* argv[]){
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
     PetscCall(DMDASetUniformCoordinates(da,0.0,user.Lx,0.0,user.Ly,0.0,0.0));
+
+    // 查看网格点
+    Vec coordinates;
+    PetscCall(DMGetCoordinates(da,&coordinates));
+    //PetscCall(VecView(coordinates,PETSC_VIEWER_STDOUT_WORLD));
     
     // create linear system matrix A
     PetscCall(DMCreateMatrix(da,&A));
@@ -124,6 +129,7 @@ int main(int argc, char* argv[]){
     PetscCall(VecDestroy(&exact));
     PetscCall(KSPDestroy(&ksp));
     PetscCall(PetscFinalize());
+    PetscCall(VecDestroy(&coordinates));
     return 0;
 }
 
