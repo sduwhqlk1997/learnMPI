@@ -31,7 +31,7 @@ static PetscReal f_RHS(PetscReal x, PetscReal y){
 static PetscReal uExact(PetscReal x, PetscReal y){
     return x*y*(1-x/2)*(1-y)*PetscExpReal(x+y);
 }
-PetscErrorCode formExact(DM, Vec);
+PetscErrorCode formExact(DM, Vec, PHelmCtx*);
 
 // FEM basis fun
 static PetscReal xiL[4] = {1.0, -1.0, -1.0, 1.0},
@@ -54,7 +54,10 @@ int main(int argc, char* argv[]){
     #endif
     DM da;
     Mat A;
-    Vec b;
+    Vec b,exact,u;
+    KSP ksp;
+    PetscReal errnorm, temp;
+
     DMDALocalInfo info;
     PHelmCtx user;
     user.quadpts = 3;
@@ -91,18 +94,35 @@ int main(int argc, char* argv[]){
     PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
 
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
-    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    PetscCall(DMCreateGlobalVector(da,&exact));
+    PetscCall(VecDuplicate(exact,&u));
+    PetscCall(formExact(da,exact,&user));
+
+    //create and solve the linear system
+    PetscCall(KSPCreate(PETSC_COMM_WORLD,&ksp));
+    PetscCall(KSPSetOperators(ksp,A,A));
+    PetscCall(KSPSetFromOptions(ksp));
+    PetscCall(KSPSolve(ksp,b,u));
+
+    //report on gird and numerical error
+    PetscCall(VecAXPY(u,-1.0,exact));
+    PetscCall(VecNorm(u,NORM_INFINITY,&errnorm));
+    PetscCall(VecNorm(exact,NORM_INFINITY,&temp));
+    errnorm /=temp;
 
     PetscCall(DMDAGetLocalInfo(da,&info));
-
     PetscCall(PetscPrintf(PETSC_COMM_WORLD,
-        "done on %d x %d grid...\n",
-        info.mx, info.my));
+                          "on %d x %d grid: error |u-uexact|_inf = %g\n",
+                        info.mx,info.my,errnorm));
     
     PetscCall(MatDestroy(&A)); // 销毁矩阵
     PetscCall(DMDestroy(&da));
     PetscCall(VecDestroy(&b));
+    PetscCall(VecDestroy(&u));
+    PetscCall(VecDestroy(&exact));
+    PetscCall(KSPDestroy(&ksp));
     PetscCall(PetscFinalize());
     return 0;
 }
@@ -264,6 +284,25 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
     PetscCall(DMDAVecRestoreArray(da, b, &ab));
     PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
+    return PETSC_SUCCESS;
+}
+
+PetscErrorCode formExact(DM da, Vec uexact, PHelmCtx* user){
+    PetscReal hx, hy, x, y, **auexact, xymin[2], xymax[2];
+    DMDALocalInfo info;
+    PetscCall(DMDAGetLocalInfo(da,&info));
+    PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
+
+    hx = user->Lx/(info.mx-1); hy = user->Ly/(info.my-1);
+    PetscCall(DMDAVecGetArray(da, uexact, &auexact));
+    for(PetscInt j = info.ys; j<info.ys + info.ym; j++){
+        y = xymin[1]+hy*j;
+        for(PetscInt i = info.xs;i<info.xs+info.xm;i++){
+            x = xymin[0]+hx*i;
+            auexact[j][i] = user->Dir(x,y);
+        }
+    }
+    PetscCall(DMDAVecRestoreArray(da,uexact,&auexact));
     return PETSC_SUCCESS;
 }
 
