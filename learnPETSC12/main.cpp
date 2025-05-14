@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
     }
     #endif
     DM da;
-    Mat A;
+    Mat A,B;
     Vec b,exact,u;
     KSP ksp;
     PetscReal errnorm, temp;
@@ -96,6 +96,14 @@ int main(int argc, char* argv[]){
 
     treateDirichletBound(da, A, b,&user);
 
+    // 测试矩阵乘法
+   
+    //PetscCall(MatMatMult(A,A,MAT_INITIAL_MATRIX,PETSC_DEFAULT,&B));
+    //PetscCall(DMCreateMatrix(da,&B));
+    //MatDuplicate(A, MAT_DO_NOT_COPY_VALUES, &B);
+    //PetscCall(MatCopy(A,B,SAME_NONZERO_PATTERN));
+    //PetscCall(MatView(B,PETSC_VIEWER_STDOUT_WORLD));
+
     PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
 
@@ -123,6 +131,7 @@ int main(int argc, char* argv[]){
                         info.mx,info.my,errnorm));
     
     PetscCall(MatDestroy(&A)); // 销毁矩阵
+    PetscCall(MatDestroy(&B));
     PetscCall(DMDestroy(&da));
     PetscCall(VecDestroy(&b));
     PetscCall(VecDestroy(&u));
