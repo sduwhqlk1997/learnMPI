@@ -48,12 +48,13 @@ int main(int argc, char* argv[]){
     {
         int i=0;
         while (0==i){
+
             sleep(10);
         }
     }
     #endif
     DM da;
-    Mat A,B;
+    Mat A;
     Vec b,exact,u;
     KSP ksp;
     PetscReal errnorm, temp;
@@ -77,8 +78,8 @@ int main(int argc, char* argv[]){
     PetscCall(DMDASetUniformCoordinates(da,0.0,user.Lx,0.0,user.Ly,0.0,0.0));
 
     // 查看网格点
-    Vec coordinates;
-    PetscCall(DMGetCoordinates(da,&coordinates));
+    //Vec coordinates;
+    //PetscCall(DMGetCoordinates(da,&coordinates));
     //PetscCall(VecView(coordinates,PETSC_VIEWER_STDOUT_WORLD));
     
     // create linear system matrix A
@@ -104,12 +105,7 @@ int main(int argc, char* argv[]){
     //PetscCall(MatCopy(A,B,SAME_NONZERO_PATTERN));
     //PetscCall(MatView(B,PETSC_VIEWER_STDOUT_WORLD));
 
-    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
-    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
-
-    //PetscCall(MatSetValue(A,PetscInt(0),PetscInt(0),PetscReal(10000.0),INSERT_VALUES));
-    //PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
-    //PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
+    //PetscCall(MatView(A,PETSC_VIEWER_STDOUT_WORLD));
     //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(DMCreateGlobalVector(da,&exact));
@@ -134,14 +130,14 @@ int main(int argc, char* argv[]){
                         info.mx,info.my,errnorm));
     
     PetscCall(MatDestroy(&A)); // 销毁矩阵
-    PetscCall(MatDestroy(&B));
+    //PetscCall(MatDestroy(&B));
     PetscCall(DMDestroy(&da));
     PetscCall(VecDestroy(&b));
     PetscCall(VecDestroy(&u));
     PetscCall(VecDestroy(&exact));
     PetscCall(KSPDestroy(&ksp));
+    //PetscCall(VecDestroy(&coordinates));
     PetscCall(PetscFinalize());
-    PetscCall(VecDestroy(&coordinates));
     return 0;
 }
 
@@ -203,8 +199,8 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
             }
         }
     }
-    PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
-    PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
+    PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
+    PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
     return PETSC_SUCCESS;
 }
 
@@ -244,9 +240,9 @@ PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
 
 PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
     DMDALocalInfo info;
-    PetscReal **ab, v[9], x, y, xymin[2], xymax[2], hy, hx;
+    PetscReal **ab, v[9], x, y, xymin[2], xymax[2], hy, hx, value;
     MatStencil row, col[9];
-    PetscInt Nv;
+    PetscInt Nv,rowInd,colInd;
     PetscCall(DMDAGetLocalInfo(da,&info));
     PetscCall(DMDAVecGetArray(da,b,&ab));
     PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
@@ -254,6 +250,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
     for(PetscInt j = info.ys;j<info.ys+info.ym;j++){
         for (PetscInt i = info.xs;i<info.xs+info.xm;i++){
             if(j==0|i==0|j==info.my-1|i==info.mx-1){
+                colInd=j*info.mx+i;
                 Nv = 0;
                 y = xymin[1]+j*hy; x = xymin[0]+i*hx;
                 ab[j][i] = user->Dir(x,y); // 处理载荷矢量
@@ -264,44 +261,85 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                 if(i-1>=0&j-1>=0){
                     col[Nv].i = i-1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv]=0;
+
+                    rowInd=(j-1)*info.mx+(i-1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    
+                    ab[j-1][i-1]-=ab[j][i]*value;
+
                     Nv++;
                 }
                 if(i>=0&j-1>=0){
                     col[Nv].i = i; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j-1)*info.mx+(i);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j-1][i]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i+1<info.mx&j-1>=0){
                     col[Nv].i = i+1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j-1)*info.mx+(i+1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j-1][i+1]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i-1>=0&j>=0){
                     col[Nv].i = i-1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j)*info.mx+(i-1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j][i-1]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i+1<info.mx&j>=0){
                     col[Nv].i = i+1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j)*info.mx+(i+1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j][i+1]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i-1>=0&j+1<info.my){
                     col[Nv].i = i-1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j+1)*info.mx+(i-1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j+1][i-1]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i>=0&j+1<info.my){
                     col[Nv].i = i; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j+1)*info.mx+(i);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j+1][i]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 if(i+1<info.mx&j+1<info.my){
                     col[Nv].i = i+1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
+
+                    rowInd=(j+1)*info.mx+(i+1);
+                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    ab[j+1][i+1]-=ab[j][i]*value;
+
                     v[Nv++]=0;
                 }
                 PetscCall(MatSetValuesStencil(A,1,&row,Nv,col,v,INSERT_VALUES));
-                
+                PetscCall(MatSetValuesStencil(A,Nv,col,1,&row,v,INSERT_VALUES));
+                PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
+                PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
             }
         }
     }
     PetscCall(DMDAVecRestoreArray(da, b, &ab));
-    PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
-    PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
     return PETSC_SUCCESS;
 }
 
