@@ -30,10 +30,20 @@ int main(int argc, char* argv[]){
     MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
 
-    // 查看原矩阵 A
     PetscPrintf(PETSC_COMM_WORLD, "Original Matrix A:\n");
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
+    // 修改矩阵的值
+    //MatSetOption(A,MAT_NEW_NONZERO_LOCATIONS,PETSC_TRUE);
+    i=1, j=1;
+    PetscReal newvalue = 1000000.0;
+    MatSetValue(A,i,j,newvalue,INSERT_VALUES);
+    MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
 
+    PetscPrintf(PETSC_COMM_WORLD, "New Matrix A:\n");
+    MatView(A, PETSC_VIEWER_STDOUT_WORLD);
+
+    /*
     // 创建行和列的索引集合
     ISCreateGeneral(PETSC_COMM_WORLD, nRows, rowsToKeep, PETSC_COPY_VALUES, &isRow);
     ISCreateGeneral(PETSC_COMM_WORLD, nCols, colsToKeep, PETSC_COPY_VALUES, &isCol);
@@ -43,10 +53,11 @@ int main(int argc, char* argv[]){
 
     PetscPrintf(PETSC_COMM_WORLD, "\nSubmatrix after removing rows and columns:\n");
     MatView(subA, PETSC_VIEWER_STDOUT_WORLD);
+    */
 
     // 销毁对象
-    ISDestroy(&isRow);
-    ISDestroy(&isCol);
+    //ISDestroy(&isRow);
+    //ISDestroy(&isCol);
     MatDestroy(&A);
     MatDestroy(&subA);
 
