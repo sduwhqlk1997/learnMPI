@@ -107,6 +107,9 @@ int main(int argc, char* argv[]){
     PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
 
+    //PetscCall(MatSetValue(A,PetscInt(0),PetscInt(0),PetscReal(10000.0),INSERT_VALUES));
+    //PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
+    //PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
     //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(DMCreateGlobalVector(da,&exact));
