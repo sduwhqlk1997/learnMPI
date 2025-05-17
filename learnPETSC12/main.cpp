@@ -95,7 +95,7 @@ int main(int argc, char* argv[]){
     PetscCall(formRHS(da, b, f_RHS, &user));
     //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
 
-    treateDirichletBound(da, A, b,&user);
+    //treateDirichletBound(da, A, b,&user);
 
     // 测试矩阵乘法
    
@@ -243,8 +243,8 @@ PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
         }
     }
     PetscCall(VecSetValues(b,Nval,index,value,ADD_VALUES));
-    VecAssemblyBegin(b);
-    VecAssemblyEnd(b);
+    PetscCall(VecAssemblyBegin(b));
+    PetscCall(VecAssemblyEnd(b));
     return PETSC_SUCCESS;
 }
 
@@ -284,7 +284,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i-1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv]=0;
                     rowInd=(j-1)*info.mx+(i-1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -296,7 +296,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j-1)*info.mx+(i);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -307,7 +307,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i+1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j-1)*info.mx+(i+1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -318,7 +318,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i-1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j)*info.mx+(i-1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -329,7 +329,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i+1; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j)*info.mx+(i+1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -340,7 +340,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i-1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j+1)*info.mx+(i-1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -351,7 +351,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j+1)*info.mx+(i);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -362,7 +362,7 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                     col[Nv].i = i+1; col[Nv].j = j+1; col[Nv].k = 0; col[Nv].c = 0;
 
                     rowInd=(j+1)*info.mx+(i+1);
-                    PetscCall(MatGetValue(A,rowInd,colInd,&value));
+                    PetscCall(MatGetValue(A,colInd,rowInd,&value));
                     valuebAdd[NbAdd]=-value*DirVal;
                     indexbAdd[NbAdd]=rowInd;
                     NbAdd++;
@@ -377,9 +377,11 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
         }
     }
     PetscCall(VecSetValues(b,NbAdd,indexbAdd,valuebAdd,ADD_VALUES));
+    PetscCall(VecAssemblyBegin(b));
+    PetscCall(VecAssemblyEnd(b));
     PetscCall(VecSetValues(b,NbInsert,indexbInsert,valuebInsert,INSERT_VALUES));
-    VecAssemblyBegin(b);
-    VecAssemblyEnd(b);
+    PetscCall(VecAssemblyBegin(b));
+    PetscCall(VecAssemblyEnd(b));
     return PETSC_SUCCESS;
 }
 
