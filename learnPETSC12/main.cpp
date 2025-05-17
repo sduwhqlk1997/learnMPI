@@ -254,8 +254,8 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
     MatStencil row, col[9];
     PetscInt Nv,rowInd,colInd;
     Mat ACopy;
-    MatDuplicate(A, MAT_COPY_VALUES,&ACopy);
-    //MatCopy(A,ACopy,SAME_NONZERO_PATTERN);
+    
+    PetscCall(MatDuplicate(A, MAT_COPY_VALUES,&ACopy));
 
     PetscCall(DMDAGetLocalInfo(da,&info));
 
