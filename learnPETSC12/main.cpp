@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
         int i=0;
         while (0==i){
 
-            sleep(10);
+            sleep(2);
         }
     }
     #endif
@@ -206,14 +206,19 @@ PetscErrorCode formMatrix(DM da, Mat A, PHelmCtx* user){ // A 为对称矩阵，
 
 PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
     DMDALocalInfo info;
-    PetscReal hx, hy, **ab, row, col, x, y, kx, ky, tx, ty, xymin[2], xymax[2];
+    PetscReal hx, hy,  x, y, kx, ky, tx, ty, xymin[2], xymax[2];
     const PetscInt li[4] = {0,1,1,0}, lj[4] = {0,0,1,1};
-
+    PetscInt Nval=0;
+    
     PetscCall(DMDAGetLocalInfo(da,&info));
+
+    PetscReal* value = new PetscReal[4*info.ym*info.xm];
+    PetscInt* index = new PetscInt[4*info.ym*info.xm];
+
     PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
     hx = user->Lx/(info.mx-1); hy = user->Ly/(info.my-1);
     ky = hy / 2.0; kx = hx / 2.0;
-    PetscCall(DMDAVecGetArray(da,b,&ab));
+    //PetscCall(DMDAVecGetArray(da,b,&ab));
     for(PetscInt j = info.ys; j<info.ys+info.ym; j++){
         if(j==info.my-1){ // 触碰上边界
             continue;
@@ -227,24 +232,37 @@ PetscErrorCode formRHS(DM da, Vec b, integrandFun f, PHelmCtx* user){
             x = xymin[0]+i * hx;
             tx = x + kx;
             for(PetscInt l = 0; l < 4; l++){
+
                 integrandFun IntFun=[l,kx,ky,tx,ty,f](PetscReal x, PetscReal y){
                     return chi(l,x,{0,0},y) * f(kx*x+tx,ky*y+ty);
                 };
-                ab[j+lj[l]][i+li[l]] += GaussIntegral(IntFun, hx, hy, user->quadpts);
+                index[Nval] = info.mx*(j+lj[l])+i+li[l];
+                value[Nval] = GaussIntegral(IntFun, hx, hy, user->quadpts);
+                Nval++;  
             }
         }
     }
-    PetscCall(DMDAVecRestoreArray(da, b, &ab));
+    PetscCall(VecSetValues(b,Nval,index,value,ADD_VALUES));
+    VecAssemblyBegin(b);
+    VecAssemblyEnd(b);
     return PETSC_SUCCESS;
 }
 
 PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
     DMDALocalInfo info;
-    PetscReal **ab, v[9], x, y, xymin[2], xymax[2], hy, hx, value;
+    PetscReal v[9], x, y, xymin[2], xymax[2], hy, hx, value,DirVal;
     MatStencil row, col[9];
     PetscInt Nv,rowInd,colInd;
     PetscCall(DMDAGetLocalInfo(da,&info));
-    PetscCall(DMDAVecGetArray(da,b,&ab));
+
+    PetscReal* valuebAdd = new PetscReal[4*info.ym*info.xm];
+    PetscInt* indexbAdd = new PetscInt[4*info.ym*info.xm];
+    PetscInt NbAdd=0;
+
+    PetscReal* valuebInsert = new PetscReal[info.ym*info.xm];
+    PetscInt* indexbInsert = new PetscInt[info.ym*info.xm];
+    PetscInt NbInsert=0;
+
     PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
     hy = user->Ly/(info.my-1); hx = user->Lx/(info.mx-1);
     for(PetscInt j = info.ys;j<info.ys+info.ym;j++){
@@ -253,7 +271,11 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                 colInd=j*info.mx+i;
                 Nv = 0;
                 y = xymin[1]+j*hy; x = xymin[0]+i*hx;
-                ab[j][i] = user->Dir(x,y); // 处理载荷矢量
+                DirVal = user->Dir(x,y);
+                valuebInsert[NbInsert] = DirVal;
+                indexbInsert[NbInsert] = colInd;
+                NbInsert++;
+                //ab[j][i] = user->Dir(x,y); // 处理载荷矢量
                 row.i = i; row.j = j; row.k = 0; row.c = 0;
                 col[Nv].i = i; col[Nv].j = j; col[Nv].k = 0; col[Nv].c = 0;
                 v[Nv]=1;
@@ -261,11 +283,12 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
                 if(i-1>=0&j-1>=0){
                     col[Nv].i = i-1; col[Nv].j = j-1; col[Nv].k = 0; col[Nv].c = 0;
                     v[Nv]=0;
-
                     rowInd=(j-1)*info.mx+(i-1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    
-                    ab[j-1][i-1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
+                    //ab[j-1][i-1]-=ab[j][i]*value;
 
                     Nv++;
                 }
@@ -274,7 +297,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j-1)*info.mx+(i);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j-1][i]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -283,7 +308,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j-1)*info.mx+(i+1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j-1][i+1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -292,7 +319,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j)*info.mx+(i-1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j][i-1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -301,7 +330,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j)*info.mx+(i+1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j][i+1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -310,7 +341,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j+1)*info.mx+(i-1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j+1][i-1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -319,7 +352,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j+1)*info.mx+(i);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j+1][i]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -328,7 +363,9 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
 
                     rowInd=(j+1)*info.mx+(i+1);
                     PetscCall(MatGetValue(A,rowInd,colInd,&value));
-                    ab[j+1][i+1]-=ab[j][i]*value;
+                    valuebAdd[NbAdd]=-value*DirVal;
+                    indexbAdd[NbAdd]=rowInd;
+                    NbAdd++;
 
                     v[Nv++]=0;
                 }
@@ -339,7 +376,10 @@ PetscErrorCode treateDirichletBound(DM da, Mat A, Vec b, PHelmCtx* user){
             }
         }
     }
-    PetscCall(DMDAVecRestoreArray(da, b, &ab));
+    PetscCall(VecSetValues(b,NbAdd,indexbAdd,valuebAdd,ADD_VALUES));
+    PetscCall(VecSetValues(b,NbInsert,indexbInsert,valuebInsert,INSERT_VALUES));
+    VecAssemblyBegin(b);
+    VecAssemblyEnd(b);
     return PETSC_SUCCESS;
 }
 
