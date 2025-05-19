@@ -26,8 +26,24 @@ static PetscBool Isbound(PetscInt i, PetscInt j, const DMDALocalInfo* info){
 
 PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     DMDALocalInfo info;
-    MatStencil Arow, Acol;
     const PetscInt li[4] = {0,1,1,0}, lj[4] = {0,0,1,1};
+    PetscCall(DMDAGetLocalInfo(da,&info));
+
+    MatStencil* AIndexInsert = new MatStencil[info.mx*info.my];
+    PetscReal* AValueInsert = new PetscReal[info.mx*info.my];
+
+    MatStencil* ArowAdd = new MatStencil[4*info.mx*info.my];
+    MatStencil* AcolAdd = new MatStencil[4*info.mx*info.my];
+    PetscReal* AValueAdd = new PetscReal[4*info.mx*info.my];
+
+    PetscInt* bindexInsert = new PetscInt[info.mx*info.my];
+    PetscReal* bValueInsert = new PetscReal[info.mx*info.my];
+    
+    PetscInt* bindexAdd = new PetscInt[4*info.mx*info.my];
+    PetscReal* bValueAdd = new PetscReal[4*info.mx*info.my];
+
+    PetscInt ANInsert = 0, ANAdd = 0, bNInsert=0, bNAdd=0;
+
     for(PetscInt j=info.ys; j<info.ys+info.ym;j++){
         if(j==info.my-1)
             continue;
@@ -36,14 +52,14 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
                 continue;
             for(PetscInt l=0; l<4; l++){//测试函数(行)
                 PetscInt itest = i+li[l], jtest=j+lj[l];
-                if(Isbound(itest,jtest,&info)==PETSC_TRUE){//在边界上
-                    for(PetscInt r=0; r<4; r++){//试探函数(列)
-
-                    }
+                if(Isbound(itest,jtest,&info)==PETSC_TRUE){//边界点对应的行
+                    AIndexInsert[ANInsert].i=itest; AIndexInsert[ANInsert].j=jtest;
+                    AIndexInsert[ANInsert].k=0; AIndexInsert[ANInsert].c=0;
+                    AValueAdd[ANInsert++] = 1.0;
                 }else{
                     for(PetscInt r=0; r<4; r++){//试探函数(列)
                         PetscInt itrail = i+li[r], jtrail=j+lj[r];
-                        if(Isbound(itrail,jtrail,&info)==PETSC_TRUE){//在边界上
+                        if(Isbound(itrail,jtrail,&info)==PETSC_TRUE){//边界点对应的列
 
                         }else{//test和trail全为内部点
 
