@@ -27,7 +27,12 @@ static PetscBool Isbound(PetscInt i, PetscInt j, const DMDALocalInfo* info){
 PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     DMDALocalInfo info;
     const PetscInt li[4] = {0,1,1,0}, lj[4] = {0,0,1,1};
+    PetscReal hx,hy,x,y,kx,ky,tx,ty, xymin[2], xymax[2], xEleStart, yEleStart;
     PetscCall(DMDAGetLocalInfo(da,&info));
+    PetscCall(DMGetBoundingBox(info.da,xymin,xymax));
+
+    hx = user->Lx/(info.mx-1); hy = user->Ly/(info.my-1);
+    ky = hy / 2.0; kx = hx / 2.0;
 
     MatStencil* AIndexInsert = new MatStencil[info.mx*info.my];
     PetscReal* AValueInsert = new PetscReal[info.mx*info.my];
@@ -50,14 +55,28 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
         for(PetscInt i=info.xs; i<info.xs+info.xm;i++){
             if(i==info.mx-1)
                 continue;
+            tx = xymin[0] + i * hx + kx; //仿射变换的bias
+            ty = xymin[1] + j * hy + ky;
             for(PetscInt l=0; l<4; l++){//测试函数(行)
                 PetscInt itest = i+li[l], jtest=j+lj[l];
                 if(Isbound(itest,jtest,&info)==PETSC_TRUE){//边界点对应的行
+                    // 矩阵
                     AIndexInsert[ANInsert].i=itest; AIndexInsert[ANInsert].j=jtest;
                     AIndexInsert[ANInsert].k=0; AIndexInsert[ANInsert].c=0;
                     AValueAdd[ANInsert++] = 1.0;
+                    // 向量 直接将边界上的解赋值
+                    x = xymin[0]+hx*itest; y = xymin[1]+hy*jtest; // 网格点坐标
+                    bindexInsert[bNInsert] = info.mx*jtest+itest;
+                    bValueInsert[bNInsert++] = user->g_Dir(x,y);
                 }else{
-                    for(PetscInt r=0; r<4; r++){//试探函数(列)
+                    // 向量 此时测试函数为内部点，做积分
+                    Fun2D IntFun=[l,kx,ky,tx,ty,user](PetscReal x, PetscReal y){
+                        return chi(l,x,{0,0},y) * user->f_rhs(kx*x+tx,ky*y+ty);
+                    };
+                    bindexAdd[bNAdd] = info.mx*jtest+itest;
+                    bValueAdd[bNAdd++] = GaussIntegral(IntFun, hx, hy, user->quadpts);
+
+                    for(PetscInt r=0; r<4; r++){//试探函数(列)/************未完成**************/
                         PetscInt itrail = i+li[r], jtrail=j+lj[r];
                         if(Isbound(itrail,jtrail,&info)==PETSC_TRUE){//边界点对应的列
 

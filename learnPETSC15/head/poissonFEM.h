@@ -13,6 +13,7 @@ typedef struct
     Fun2D f_rhs;
     Fun2D g_Dir;
     Fun2D u_exact;
+    PetscInt quadpts;
 }PoissonCtx;
 
 // FEM basis fun
