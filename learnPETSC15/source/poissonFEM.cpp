@@ -35,18 +35,18 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     ky = hy / 2.0; kx = hx / 2.0;
     cx = 4/(hx*hx); cy = 4/(hy*hy);
 
-    MatStencil* AIndexInsert = new MatStencil[info.mx*info.my];
-    PetscReal* AValueInsert = new PetscReal[info.mx*info.my];
+    MatStencil* AIndexInsert = new MatStencil[16*info.xm*info.ym];
+    PetscReal* AValueInsert = new PetscReal[16*info.xm*info.ym];
 
-    MatStencil* ArowAdd = new MatStencil[4*info.mx*info.my];
-    MatStencil* AcolAdd = new MatStencil[4*info.mx*info.my];
-    PetscReal* AValueAdd = new PetscReal[4*info.mx*info.my];
+    MatStencil* ArowAdd = new MatStencil[16*info.xm*info.ym];
+    MatStencil* AcolAdd = new MatStencil[16*info.xm*info.ym];
+    PetscReal* AValueAdd = new PetscReal[16*info.xm*info.ym];
 
-    PetscInt* bindexInsert = new PetscInt[info.mx*info.my];
-    PetscReal* bValueInsert = new PetscReal[info.mx*info.my];
+    PetscInt* bindexInsert = new PetscInt[16*info.xm*info.ym];
+    PetscReal* bValueInsert = new PetscReal[16*info.xm*info.ym];
     
-    PetscInt* bindexAdd = new PetscInt[4*info.mx*info.my];
-    PetscReal* bValueAdd = new PetscReal[4*info.mx*info.my];
+    PetscInt* bindexAdd = new PetscInt[16*info.xm*info.ym];
+    PetscReal* bValueAdd = new PetscReal[16*info.xm*info.ym];
 
     PetscInt ANInsert = 0, ANAdd = 0, bNInsert=0, bNAdd=0;
 
@@ -107,13 +107,13 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
 
     for(PetscInt i=0;i<ANInsert;i++){
-        //PetscCall(MatSetValuesStencil(A,1,&AIndexInsert[i],1,&AIndexInsert[i],&AValueInsert[i],INSERT_VALUES));
-        PetscCall(MatSetValuesStencil(A,1,AIndexInsert,1,AIndexInsert,AValueInsert++,INSERT_VALUES));
-        AIndexInsert++;
+        PetscCall(MatSetValuesStencil(A,1,&AIndexInsert[i],1,&AIndexInsert[i],&AValueInsert[i],INSERT_VALUES));
+        //PetscCall(MatSetValuesStencil(A,1,AIndexInsert,1,AIndexInsert,AValueInsert++,INSERT_VALUES));
+        //AIndexInsert++;
     }
     PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     
     PetscCall(VecSetValues(b,bNAdd,bindexAdd,bValueAdd,ADD_VALUES));
     PetscCall(VecAssemblyBegin(b));

@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
     PetscCall(DMCreateMatrix(da,&A));
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrixVec(da,A,b,&user));
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     
     // form exact solutions
     PetscCall(DMCreateGlobalVector(da,&exact));
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
     PetscCall(formExact(da,exact,&user));
 
     //create and solve the linear system
-    /*
+    
     PetscCall(KSPCreate(PETSC_COMM_WORLD,&ksp));
     PetscCall(KSPSetOperators(ksp,A,A));
     PetscCall(KSPSetFromOptions(ksp));
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]){
     PetscCall(PetscPrintf(PETSC_COMM_WORLD,
                           "on %d x %d grid: error |u-uexact|_inf = %g\n",
                         info.mx,info.my,errnorm));
-    */
+    
     PetscCall(MatDestroy(&A)); // 销毁矩阵
     //PetscCall(MatDestroy(&B));
     PetscCall(DMDestroy(&da));
