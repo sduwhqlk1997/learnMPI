@@ -64,7 +64,7 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
                     // 矩阵
                     AIndexInsert[ANInsert].i=itest; AIndexInsert[ANInsert].j=jtest;
                     AIndexInsert[ANInsert].k=0; AIndexInsert[ANInsert].c=0;
-                    AValueAdd[ANInsert++] = 1.0;
+                    AValueInsert[ANInsert++] = 1.0;
                     // 向量 直接将边界上的解赋值
                     x = xymin[0]+hx*itest; y = xymin[1]+hy*jtest; // 网格点坐标
                     bindexInsert[bNInsert] = info.mx*jtest+itest;
@@ -100,17 +100,21 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     }
     // 向矩阵和向量中填充值
     for(PetscInt i=0;i<ANAdd;i++){
-        PetscCall(MatSetValuesStencil(A,1,&ArowAdd[i],1,&AcolAdd[i],&AValueAdd[i],ADD_VALUES));
+        //PetscCall(MatSetValuesStencil(A,1,&ArowAdd[i],1,&AcolAdd[i],&AValueAdd[i],ADD_VALUES));
+        PetscCall(MatSetValuesStencil(A,1,ArowAdd++,1,AcolAdd++,AValueAdd++,ADD_VALUES));
     }
     PetscCall(MatAssemblyBegin(A,MAT_FLUSH_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FLUSH_ASSEMBLY));
 
     for(PetscInt i=0;i<ANInsert;i++){
-        PetscCall(MatSetValuesStencil(A,1,&AIndexInsert[i],1,&AIndexInsert[i],&AValueInsert[i],INSERT_VALUES));
+        //PetscCall(MatSetValuesStencil(A,1,&AIndexInsert[i],1,&AIndexInsert[i],&AValueInsert[i],INSERT_VALUES));
+        PetscCall(MatSetValuesStencil(A,1,AIndexInsert,1,AIndexInsert,AValueInsert++,INSERT_VALUES));
+        AIndexInsert++;
     }
     PetscCall(MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY));
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
-
+    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+    
     PetscCall(VecSetValues(b,bNAdd,bindexAdd,bValueAdd,ADD_VALUES));
     PetscCall(VecAssemblyBegin(b));
     PetscCall(VecAssemblyEnd(b));
