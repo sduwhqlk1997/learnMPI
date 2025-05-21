@@ -68,6 +68,7 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
                     // 向量 直接将边界上的解赋值
                     x = xymin[0]+hx*itest; y = xymin[1]+hy*jtest; // 网格点坐标
                     bindexInsert[bNInsert] = info.mx*jtest+itest;
+                    
                     bValueInsert[bNInsert++] = user->g_Dir(x,y);
                 }else{
                     // 向量 此时测试函数为内部点，做积分
@@ -118,10 +119,23 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     PetscCall(VecSetValues(b,bNAdd,bindexAdd,bValueAdd,ADD_VALUES));
     PetscCall(VecAssemblyBegin(b));
     PetscCall(VecAssemblyEnd(b));
-
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(VecSetValues(b,bNInsert,bindexInsert,bValueInsert,INSERT_VALUES));
     PetscCall(VecAssemblyBegin(b));
     PetscCall(VecAssemblyEnd(b));
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    /*测试段
+    PetscInt rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+    PetscCall(PetscPrintf(PETSC_COMM_SELF," 线程 %d ：\n\n" ,rank));
+    for(PetscInt i = 0; i<bNAdd;i++){
+        PetscCall(PetscPrintf(PETSC_COMM_SELF," %g，累加到 %d 位置\n" ,bValueAdd[i],bindexAdd[i]));
+    }
+    PetscCall(PetscPrintf(PETSC_COMM_SELF," \n\n" ));
+    for(PetscInt i = 0; i<bNInsert;i++){
+        PetscCall(PetscPrintf(PETSC_COMM_SELF," %g，插入到 %d 位置\n" ,bValueInsert[i],bindexInsert[i]));
+    }
+    PetscCall(PetscPrintf(PETSC_COMM_SELF," \n\n" ));*/
     return PETSC_SUCCESS;
 }
 

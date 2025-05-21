@@ -46,23 +46,27 @@ int main(int argc, char* argv[]){
     PetscOptionsEnd();
 
     PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
-        DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 3, 3, 
-        PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, NULL, &da));
+        DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 5, 5, 
+        1, 2, 1, 1, NULL, NULL, &da));
     PetscCall(DMSetApplicationContext(da,&user));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
     PetscCall(DMDASetUniformCoordinates(da,0.0,user.Lx,0.0,user.Ly,0.0,0.0));
+    PetscCall(DMDAGetLocalInfo(da,&info));
 
     // create Matrix and Vec
     PetscCall(DMCreateGlobalVector(da,&b));
     PetscCall(VecSet(b,0.0));
+    
+    //PetscCall(VecSetFromOptions(b));
     PetscCall(DMCreateMatrix(da,&A));
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrixVec(da,A,b,&user));
-    //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+
+    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     
     // form exact solutions
-    PetscCall(DMCreateGlobalVector(da,&exact));
+    PetscCall(VecDuplicate(b,&exact));
     PetscCall(VecDuplicate(exact,&u));
     PetscCall(formExact(da,exact,&user));
 
@@ -73,13 +77,20 @@ int main(int argc, char* argv[]){
     PetscCall(KSPSetFromOptions(ksp));
     PetscCall(KSPSolve(ksp,b,u));
     
+    //PetscCall(VecView(u, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(VecView(exact, PETSC_VIEWER_STDOUT_WORLD));
     //compute the relative error
     PetscCall(VecAXPY(u,-1.0,exact));
     PetscCall(VecNorm(u,NORM_INFINITY,&errnorm));
     PetscCall(VecNorm(exact,NORM_INFINITY,&temp));
     errnorm /=temp;
 
-    PetscCall(DMDAGetLocalInfo(da,&info));
+    
+    PetscInt rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+    PetscCall(PetscPrintf(PETSC_COMM_SELF,
+                          "进程 %d x 方向索引为 %d 到 %d，y 方向索引为 %d 到 %d\n",
+                        rank,info.xs,info.xs+info.xm-1,info.ys,info.ys+info.ym-1));
     PetscCall(PetscPrintf(PETSC_COMM_WORLD,
                           "on %d x %d grid: error |u-uexact|_inf = %g\n",
                         info.mx,info.my,errnorm));
