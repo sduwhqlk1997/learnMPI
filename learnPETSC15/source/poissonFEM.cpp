@@ -42,13 +42,25 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     MatStencil* AcolAdd = new MatStencil[16*info.xm*info.ym];
     PetscReal* AValueAdd = new PetscReal[16*info.xm*info.ym];
 
-    PetscInt* bindexInsert = new PetscInt[16*info.xm*info.ym];
+    /*PetscInt* bindexInsert = new PetscInt[16*info.xm*info.ym];
     PetscReal* bValueInsert = new PetscReal[16*info.xm*info.ym];
     
     PetscInt* bindexAdd = new PetscInt[16*info.xm*info.ym];
-    PetscReal* bValueAdd = new PetscReal[16*info.xm*info.ym];
+    PetscReal* bValueAdd = new PetscReal[16*info.xm*info.ym];*/
+    //, bNInsert=0, bNAdd=0
 
-    PetscInt ANInsert = 0, ANAdd = 0, bNInsert=0, bNAdd=0;
+    PetscInt ANInsert = 0, ANAdd = 0;
+
+    Vec localVecAdd, localVecInsert;
+    PetscCall(DMCreateLocalVector(da,&localVecAdd));
+    PetscCall(DMCreateLocalVector(da,&localVecInsert));
+    DMGlobalToLocalBegin(da,b,INSERT_VALUES,localVecAdd);
+    DMGlobalToLocalEnd(da,b,INSERT_VALUES,localVecAdd);
+    DMGlobalToLocalBegin(da,b,INSERT_VALUES,localVecInsert);
+    DMGlobalToLocalEnd(da,b,INSERT_VALUES,localVecInsert);
+    PetscReal **abAdd, **abInsert;
+    PetscCall(DMDAVecGetArray(da,localVecAdd, &abAdd));
+    PetscCall(DMDAVecGetArray(da,localVecAdd, &abInsert));
 
     for(PetscInt j=info.ys; j<info.ys+info.ym;j++){
         if(j==info.my-1)
@@ -67,17 +79,17 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
                     AValueInsert[ANInsert++] = 1.0;
                     // 向量 直接将边界上的解赋值
                     x = xymin[0]+hx*itest; y = xymin[1]+hy*jtest; // 网格点坐标
-                    bindexInsert[bNInsert] = info.mx*jtest+itest;
-                    
-                    bValueInsert[bNInsert++] = user->g_Dir(x,y);
+                    //bindexInsert[bNInsert] = info.mx*jtest+itest;
+                    abInsert[jtest][itest] = user->g_Dir(x,y);
+                    //bValueInsert[bNInsert++] = user->g_Dir(x,y);
                 }else{
                     // 向量 此时测试函数为内部点，做积分
                     Fun2D IntFunVec=[l,kx,ky,tx,ty,user](PetscReal x, PetscReal y){
                         return chi(l,x,{0,0},y) * user->f_rhs(kx*x+tx,ky*y+ty);
                     };
-                    bindexAdd[bNAdd] = info.mx*jtest+itest;
-                    bValueAdd[bNAdd++] = GaussIntegral(IntFunVec, hx, hy, user->quadpts);
-
+                    //bindexAdd[bNAdd] = info.mx*jtest+itest;
+                    //bValueAdd[bNAdd++] = GaussIntegral(IntFunVec, hx, hy, user->quadpts);
+                    abAdd[jtest][itest]+=GaussIntegral(IntFunVec, hx, hy, user->quadpts);
                     for(PetscInt r=0; r<4; r++){//试探函数(列)
                         PetscInt itrail = i+li[r], jtrail=j+lj[r];
                         Fun2D IntFunMat = [l,r,cx,cy](PetscReal x,PetscReal y){
@@ -87,8 +99,9 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
                         if(Isbound(itrail,jtrail,&info)==PETSC_TRUE){//边界点对应的列
                             x = xymin[0] + itrail*hx; y = xymin[1] + jtrail*hy;
                             PetscReal boundVal = user->g_Dir(x,y);
-                            bindexAdd[bNAdd] = info.mx*jtest + itest;
-                            bValueAdd[bNAdd++] = -boundVal*GaussIntegral(IntFunMat,hx,hy,user->quadpts);
+                            //bindexAdd[bNAdd] = info.mx*jtest + itest;
+                            //bValueAdd[bNAdd++] = -boundVal*GaussIntegral(IntFunMat,hx,hy,user->quadpts);
+                            abAdd[jtest][itest] -= boundVal*GaussIntegral(IntFunMat,hx,hy,user->quadpts);
                         }else{//test和trail全为内部点
                             ArowAdd[ANAdd].c=0; ArowAdd[ANAdd].k=0; ArowAdd[ANAdd].i=itest; ArowAdd[ANAdd].j=jtest;
                             AcolAdd[ANAdd].c=0; AcolAdd[ANAdd].k=0; AcolAdd[ANAdd].i=itrail; AcolAdd[ANAdd].j=jtrail;
@@ -99,6 +112,9 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
             }
         }
     }
+
+    PetscCall(DMDAVecRestoreArray(da,localVecAdd,&abAdd));
+    PetscCall(DMDAVecRestoreArray(da,localVecInsert,&abInsert));
     // 向矩阵和向量中填充值
     for(PetscInt i=0;i<ANAdd;i++){
         //PetscCall(MatSetValuesStencil(A,1,&ArowAdd[i],1,&AcolAdd[i],&AValueAdd[i],ADD_VALUES));
@@ -116,18 +132,26 @@ PetscErrorCode formMatrixVec(DM da, Mat A, Vec b, PoissonCtx *user){
     PetscCall(MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY));
     //PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
     
+    
+    PetscCall(DMLocalToGlobalBegin(da,localVecInsert, INSERT_VALUES, b));
+    PetscCall(DMLocalToGlobalEnd(da,localVecInsert, INSERT_VALUES, b));
+    PetscCall(DMLocalToGlobalBegin(da,localVecAdd, ADD_VALUES, b));
+    PetscCall(DMLocalToGlobalEnd(da,localVecAdd, ADD_VALUES, b));
+
+    
+
+    /*
     PetscCall(VecSetValues(b,bNAdd,bindexAdd,bValueAdd,ADD_VALUES));
     PetscCall(VecAssemblyBegin(b));
     PetscCall(VecAssemblyEnd(b));
-    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     PetscCall(VecSetValues(b,bNInsert,bindexInsert,bValueInsert,INSERT_VALUES));
     PetscCall(VecAssemblyBegin(b));
     PetscCall(VecAssemblyEnd(b));
-    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    */
     /*测试段
     PetscInt rank;
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    PetscCall(PetscPrintf(PETSC_COMM_SELF," 线程 %d ：\n\n" ,rank));
+    PetscCall(PetscPrintf(PETSC_COMM_SELF," 线程 %d 共有 %d 个值需要累加 %d 个值需要插入\n\n" ,rank,bNAdd,bNInsert));
     for(PetscInt i = 0; i<bNAdd;i++){
         PetscCall(PetscPrintf(PETSC_COMM_SELF," %g，累加到 %d 位置\n" ,bValueAdd[i],bindexAdd[i]));
     }

@@ -46,8 +46,8 @@ int main(int argc, char* argv[]){
     PetscOptionsEnd();
 
     PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
-        DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 5, 5, 
-        1, 2, 1, 1, NULL, NULL, &da));
+        DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 3, 3, 
+        2, 1, 1, 1, NULL, NULL, &da));
     PetscCall(DMSetApplicationContext(da,&user));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
