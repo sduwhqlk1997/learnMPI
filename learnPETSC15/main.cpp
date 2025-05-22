@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 
     PetscCall(DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, 
         DM_BOUNDARY_NONE,DMDA_STENCIL_BOX, 3, 3, 
-        2, 1, 1, 1, NULL, NULL, &da));
+        PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, NULL, &da));
     PetscCall(DMSetApplicationContext(da,&user));
     PetscCall(DMSetFromOptions(da));
     PetscCall(DMSetUp(da));
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
     PetscCall(MatSetFromOptions(A));
     PetscCall(formMatrixVec(da,A,b,&user));
 
-    PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
+    //PetscCall(VecView(b, PETSC_VIEWER_STDOUT_WORLD));
     
     // form exact solutions
     PetscCall(VecDuplicate(b,&exact));
@@ -86,11 +86,11 @@ int main(int argc, char* argv[]){
     errnorm /=temp;
 
     
-    PetscInt rank;
+    /*PetscInt rank;
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
     PetscCall(PetscPrintf(PETSC_COMM_SELF,
                           "进程 %d x 方向索引为 %d 到 %d，y 方向索引为 %d 到 %d\n",
-                        rank,info.xs,info.xs+info.xm-1,info.ys,info.ys+info.ym-1));
+                        rank,info.xs,info.xs+info.xm-1,info.ys,info.ys+info.ym-1));*/
     PetscCall(PetscPrintf(PETSC_COMM_WORLD,
                           "on %d x %d grid: error |u-uexact|_inf = %g\n",
                         info.mx,info.my,errnorm));
