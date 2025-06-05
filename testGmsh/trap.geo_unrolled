@@ -1,0 +1,14 @@
+cl__1 = 1.5;
+Point(1) = {2, 0, 0, cl__1};
+Point(2) = {1, 1, 0, cl__1};
+Point(3) = {-1, 1, 0, cl__1};
+Point(4) = {-2, 0, 0, cl__1};
+Line(5) = {1, 2};
+Line(6) = {2, 3};
+Line(7) = {3, 4};
+Line(8) = {4, 1};
+Curve Loop(10) = {5, 6, 7, 8};
+Plane Surface(10) = {10};
+Physical Curve("neumann") = {8, 8};
+Physical Curve("dirichlet") = {5, 6, 7, 6, 7, 7};
+Physical Surface("interior") = {10, 10};

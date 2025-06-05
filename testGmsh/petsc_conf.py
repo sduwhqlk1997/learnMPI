@@ -1,0 +1,1 @@
+/root/Cppackage/petsc/lib/petsc/bin/petsc_conf.py
