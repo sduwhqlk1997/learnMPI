@@ -47,5 +47,11 @@ PetscErrorCode UMReadISs(UM *mesh, char *filename){
     if ((mesh->K>0) || (mesh->P>0) || (mesh->e!=NULL) || (mesh->bf!=NULL)||(mesh->ns != NULL)){
         SETERRQ(PETSC_COMM_SELF,1,"elements, boundary flags, Neumann boundary segments already created?... stopping\n");
     }
+    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_READ,&viewer));
+    // create and load e
+    PetscCall(ISCreate(PETSC_COMM_WORLD,&(mesh->e)));
+    PetscCall(ISLoad(mesh->e,viewer));
+    PetscCall(ISGetSize(mesh->e,&(mesh->K)));
+    
     return 0;
 }
