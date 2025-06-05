@@ -1,2 +1,6 @@
 build/
 CMakeLists.txt
+petsc_conf.py
+PetscBinaryIO.py
+meshes/__pycache__/
+__pycache__/
